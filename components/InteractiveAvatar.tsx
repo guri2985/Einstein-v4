@@ -59,45 +59,27 @@ export default function InteractiveAvatar() {
     }
     return "";
   }
-
   async function startSession() {
     setIsLoadingSession(true);
     const newToken = await fetchAccessToken();
-
+  
     avatar.current = new StreamingAvatar({
       token: newToken,
       basePath: baseApiUrl(),
     });
-
-    avatar.current.on(StreamingEvents.AVATAR_START_TALKING, (e) => {
-      console.log("Avatar started talking", e);
-    });
-
-    avatar.current.on(StreamingEvents.AVATAR_STOP_TALKING, (e) => {
-      console.log("Avatar stopped talking", e);
-    });
-
-    avatar.current.on(StreamingEvents.STREAM_DISCONNECTED, () => {
-      console.log("Stream disconnected");
-      endSession();
-    });
-
-    avatar.current?.on(StreamingEvents.STREAM_READY, (event) => {
+  
+    avatar.current.on(StreamingEvents.STREAM_READY, (event) => {
       console.log(">>>>> Stream ready:", event.detail);
       setStream(event.detail);
-      setTimeout(() => setMaskVisible(true), 0); // Add slight delay
+      setTimeout(() => setMaskVisible(true), 0);
+  
+      // Ensure avatar video is visible again
+      const avatarVideo = document.querySelector(".avatar-stream") as HTMLElement;
+      if (avatarVideo) {
+        avatarVideo.style.opacity = "1";
+      }
     });
-
-    avatar.current?.on(StreamingEvents.USER_START, (event) => {
-      console.log(">>>>> User started talking:", event);
-      setIsUserTalking(true);
-    });
-
-    avatar.current?.on(StreamingEvents.USER_STOP, (event) => {
-      console.log(">>>>> User stopped talking:", event);
-      setIsUserTalking(false);
-    });
-
+  
     try {
       const res = await avatar.current.createStartAvatar({
         quality: AvatarQuality.High,
@@ -110,7 +92,7 @@ export default function InteractiveAvatar() {
         language: language,
         disableIdleTimeout: true,
       });
-
+  
       setData(res);
       await avatar.current?.startVoiceChat({
         useSilencePrompt: false,
@@ -121,8 +103,7 @@ export default function InteractiveAvatar() {
     } finally {
       setIsLoadingSession(false);
     }
-
-    // Start the transition effect after the session starts
+  
     startSessionTransition();
   }
 
