@@ -171,83 +171,38 @@ export default function InteractiveAvatar() {
     });
   }
 
-
+  async function endSession() {
+    if (!avatar.current) return;
   
-    // Function to show GIF on close session
-    const showCloseSessionGif = () => {
-      // Create the GIF image for transition
-      const gifImage = document.createElement("img");
-      gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif"; // Your GIF source
-      gifImage.style.position = "absolute";
-      gifImage.style.left = "0";
-      gifImage.style.width = "100%";
-      gifImage.style.height = "100%";
-      gifImage.style.top = "0";
-      gifImage.style.opacity = "1"; // Ensure it is visible immediately
-      gifImage.style.zIndex = "1000"; // On top of everything else
-    
-      // Get the main container where everything will be added
-      const mainUpDiv = document.querySelector(".main-up");
-    
-      // Append the GIF to the main-up container
-      if (mainUpDiv) {
-        mainUpDiv.appendChild(gifImage);
-      }
-    
-      // Remove GIF after 4 seconds and trigger session end
-      setTimeout(() => {
-        if (gifImage.parentElement) {
-          gifImage.parentElement.removeChild(gifImage); // Remove GIF after it plays once
-        }
-        // Proceed with ending the session
-        completeEndSession();
-      }, 3000);
-    };
-
-
-    async function endSession() {
-      // Check if the session is already started
-      if (!avatar.current) return;
-    
-      // Step 1: Show the GIF transition only if the session has been started
-      if (stream) {
-        showCloseSessionGif();  // Show GIF only if the stream is available (i.e., session has started)
-      }
-   
+    // Start the fade-out effect on avatar and background videos
+    const avatarVideo = document.querySelector(".avatar-stream") as HTMLVideoElement;
+    const backgroundVideo = document.querySelector("#main-video1") as HTMLVideoElement;
+    const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
+  
+    // Apply fade-out transition to avatar and background videos
+    if (avatarVideo && backgroundVideo) {
+      avatarVideo.style.transition = "opacity 1s ease-out";  // Smooth fade-out for avatar
+      backgroundVideo.style.transition = "opacity 1s ease-out";  // Smooth fade-out for background
+  
+      avatarVideo.style.opacity = "0";  // Fade out avatar
+      backgroundVideo.style.opacity = "0";  // Fade out background
     }
-    
-   
-
-
-    // Function to complete session end after GIF
-    async function completeEndSession() {
-      if (!avatar.current) return;
-    
-      // Start the fade-out effect on avatar and background videos
-      const avatarVideo = document.querySelector(".avatar-stream") as HTMLVideoElement;
-      const backgroundVideo = document.querySelector("#main-video1") as HTMLVideoElement;
-      const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
-    
-      if (avatarVideo && backgroundVideo) {
-        avatarVideo.style.transition = "opacity 0s ease-out";
-        backgroundVideo.style.transition = "opacity 0s ease-out";
-        avatarVideo.style.opacity = "0";
-        backgroundVideo.style.opacity = "0";
-      }
-    
-      if (mainOneDiv) {
-        mainOneDiv.style.transition = "opacity 0s ease-out";
-        mainOneDiv.style.opacity = "0";
-      }
-    
-      setTimeout(async () => {
-        await avatar.current?.stopAvatar();
-        setStream(undefined);
-        setMaskVisible(false);
-      }, 4000);
+  
+    // Apply fade-out effect to the .main-one container as well
+    if (mainOneDiv) {
+      mainOneDiv.style.transition = "opacity 1s ease-out";  // Smooth fade-out for .main-one
+      mainOneDiv.style.opacity = "0";  // Fade out entire container
     }
-    
- 
+  
+    // Wait for the fade-out to complete (2 seconds in this case) before stopping the session
+    setTimeout(async () => {
+      // Now stop the session after the fade-out effect completes
+      await avatar.current?.stopAvatar();
+      setStream(undefined);
+      setMaskVisible(false);
+    }, 1000);  // Matches the fade-out duration
+  }
+  
 
   const handleChangeChatMode = useMemoizedFn(async (v) => {
     if (v === chatMode) {
@@ -303,13 +258,13 @@ export default function InteractiveAvatar() {
             height: "100%",
             objectFit: "cover",
             opacity: "1",
-            transition: "opacity 1s ease-in-out",
+            transition: "opacity .5s ease-in-out",
           }}
         />
       </div>
 
       {/* Avatar video and new background */}
-      <div className="main-one" style={{ opacity: "0", transition: "opacity 0s ease-in-out" }}>
+      <div className="main-one" style={{ opacity: "0", transition: "opacity 1s ease-in-out" }}>
       <video
   id="main-video1"
   src="https://ounocreatstg.wpenginepowered.com/videos/main-video.mp4"
