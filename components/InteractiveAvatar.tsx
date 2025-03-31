@@ -265,7 +265,7 @@ export default function InteractiveAvatar() {
       {/* Default screensaver video */}
       <div className="main-up" style={{ height: "100%" }}>
         <video
-          src="https://ounocreatstg.wpenginepowered.com/videos/SCREENSAVER.mp4"
+          src="https://ounocreatstg.wpenginepowered.com/videos/screensaver.mp4"
           autoPlay
           loop
           muted
