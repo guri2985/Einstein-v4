@@ -1,4 +1,5 @@
 import type { StartAvatarResponse } from "@heygen/streaming-avatar";
+import { motion } from "framer-motion";
 import StreamingAvatar, {
   AvatarQuality,
   StreamingEvents,
@@ -358,14 +359,23 @@ export default function InteractiveAvatar() {
       <Card>
         <CardBody>
           {!stream && !isLoadingSession ? (
-            <Button
-              className="bg-gradient-to-tr from-indigo-500 to-indigo-300 w-full text-white"
-              size="md"
-              variant="shadow"
-              onClick={startSession}
-            >
+            <motion.div
+            initial={{ scale: .5, opacity: 1 }}
+            animate={{ scale: [1, 1.1, 1], opacity: 1 }}
+            transition={{
+              duration: 1,
+              ease: "easeInOut",
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+          ><Button 
+          className="bg-gradient-to-tr from-[#ff1c1b] to-[#f73e3d] w-full text-white text-[17px] py-[26px] px-[30px]"
+          size="md"
+          variant="shadow"
+          onClick={startSession}
+        >
               Start session
-            </Button>
+            </Button> </motion.div>
           ) : isLoadingSession ? (
             <Spinner color="default" size="lg" />
           ) : (
@@ -374,7 +384,7 @@ export default function InteractiveAvatar() {
                 <>
                  
                   <Button
-                    className="bg-gradient-to-tr from-indigo-500 to-indigo-300  text-white rounded-lg"
+                    className="bg-gradient-to-tr from-[#ff1c1b] to-[#f73e3d] text-white rounded-lg text-[17px] py-[26px] px-[30px]"
                     size="md"
                     variant="shadow"
                     onClick={endSession}
