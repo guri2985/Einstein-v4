@@ -372,8 +372,8 @@ const startSessionTransition = () => {
     objectFit: "cover",
     opacity: "0", // Initially hidden
     zIndex: "10",
-    maskImage: 'radial-gradient(circle at 50% 12%, transparent 160px, rgb(255, 255, 255) 180px)', 
-    WebkitMaskImage: 'radial-gradient(circle at 50% 12%, transparent 160px, rgb(255, 255, 255) 180px)', 
+    maskImage: 'radial-gradient(circle at 50% 12%, transparent 130px, rgb(255, 255, 255) 180px)', 
+    WebkitMaskImage: 'radial-gradient(circle at 50% 12%, transparent 130px, rgb(255, 255, 255) 180px)', 
   }}
 />
 
@@ -385,7 +385,7 @@ const startSessionTransition = () => {
           style={{
             objectFit: "contain",
               position: "absolute",
-              top: "332px",
+              top: "330px",
               left: "50.7%",
               transform: "translate(-50%, -50%)",  // Centers the avatar on the screen
               width:"1010px",
