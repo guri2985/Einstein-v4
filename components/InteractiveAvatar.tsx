@@ -111,43 +111,55 @@ export default function InteractiveAvatar() {
   }
 
   // Start the session transition with GIF and fade-in effects
-  const startSessionTransition = () => {
-    // Create the GIF image for transition
-    const gifImage = document.createElement("img");
-    gifImage.src = "https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Transitions_Pixel_vertical-In.gif"; // Your GIF source
-    gifImage.style.position = "absolute";
-    gifImage.style.left = "0";
-    gifImage.style.width = "100%";
-    gifImage.style.height = "100%";
-    gifImage.style.top = "0";
-    gifImage.style.opacity = "1"; // Ensure it is visible immediately
-    gifImage.style.zIndex = "1000"; // On top of everything else
-  
-    // Get the main container where everything will be added
-    const mainUpDiv = document.querySelector(".main-one");
-  
-    // Append the GIF to the main-up container
-    if (mainUpDiv) {
-      mainUpDiv.appendChild(gifImage);
+  let isGifLoaded = false; // A flag to track if the GIF is loaded or not
+
+// Start the session transition with GIF and fade-in effects
+const startSessionTransition = () => {
+  // Check if GIF has already been added to prevent duplicate loading
+  if (isGifLoaded) return; // Prevent adding the GIF again
+
+  isGifLoaded = true; // Set flag to true once GIF is loaded
+
+  // Create the GIF image for transition
+  const gifImage = document.createElement("img");
+  gifImage.src = "https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Transitions_Pixel_vertical-In.gif"; // Your GIF source
+  gifImage.style.position = "absolute";
+  gifImage.style.left = "0";
+  gifImage.style.width = "100%";
+  gifImage.style.height = "100%";
+  gifImage.style.top = "0";
+  gifImage.style.opacity = "1"; // Ensure it is visible immediately
+  gifImage.style.zIndex = "1000"; // On top of everything else
+
+  // Get the main container where everything will be added
+  const mainUpDiv = document.querySelector(".main-one");
+
+  // Append the GIF to the main-up container
+  if (mainUpDiv) {
+    mainUpDiv.appendChild(gifImage);
+  }
+
+  // Fade in effects after 0 seconds (immediately)
+  setTimeout(() => {
+    const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
+    const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement;
+
+    if (mainOneDiv) mainOneDiv.style.opacity = "1"; // Fade in main video
+    if (videoBackground) videoBackground.style.opacity = "1"; // Fade in background video
+  }, 0);
+
+  // Remove GIF after 4 seconds and show buttons after the GIF
+  setTimeout(() => {
+    // Remove GIF after it plays once
+    if (gifImage.parentElement) {
+      gifImage.parentElement.removeChild(gifImage);
     }
-  
-    // Fade in effects after 2 seconds
-    setTimeout(() => {
-      const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
-      const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement;
-      if (mainOneDiv) mainOneDiv.style.opacity = "1"; // Fade in main video
-      if (videoBackground) videoBackground.style.opacity = "1"; // Fade in background video
-    }, 0);
-  
-    // Remove GIF after 4 seconds and show buttons after the GIF
-    setTimeout(() => {
-      if (gifImage.parentElement) {
-        gifImage.parentElement.removeChild(gifImage); // Remove GIF after it plays once
-      }
-      // Delay showing the buttons
-      setButtonsVisible(true); // Show buttons after GIF removal
-    }, 4000);
-  };
+
+    // Delay showing the buttons after GIF removal
+    setButtonsVisible(true); // Show buttons after GIF removal
+  }, 4000);
+};
+
   
 
   async function handleSpeak() {
@@ -207,16 +219,37 @@ export default function InteractiveAvatar() {
       }, 4000);
     };
 
-
+    useEffect(() => {
+      // Ensure screensaver video restarts on component mount
+      const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
+      if (screensaverVideo) {
+        screensaverVideo.pause();  
+        screensaverVideo.currentTime = 0; 
+        screensaverVideo.load(); // Force reload
+        screensaverVideo.play();
+      }
+    }, []);
+    
     async function endSession() {
       if (!avatar.current) return;
     
       if (stream) {
-        setButtonsVisible(false); // Instantly hide the End Session button
+        setButtonsVisible(false); // Hide the End Session button
         showCloseSessionGif(); // Show the GIF transition
-        await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait for 4 seconds
+        await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait for 3 seconds
         completeEndSession(); // End the session after the GIF transition
       }
+    
+      // **Force Restart of Screensaver Video**
+      setTimeout(() => {
+        const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
+        if (screensaverVideo) {
+          screensaverVideo.pause();  // Pause in case it's playing
+          screensaverVideo.currentTime = 0; // Restart from beginning
+          screensaverVideo.load(); // Force reload
+          screensaverVideo.play(); // Ensure it starts playing again
+        }
+      }, 4000); // Restart screensaver after transition
     }
     
 
@@ -304,22 +337,23 @@ export default function InteractiveAvatar() {
       
       {/* Default screensaver video */}
       <div className="main-up" style={{ height: "100%" }}>
-        <video
-          src="https://ounocreatstg.wpenginepowered.com/videos/screensaver.mp4"
-          autoPlay
-          loop
-          muted
-          style={{
-            position: "absolute",
-            top: "0",
-            left: "0",
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            opacity: "1",
-            transition: "opacity 1s ease-in-out",
-          }}
-        />
+      <video
+  className="screensaver-video"
+  src="https://ounocreatstg.wpenginepowered.com/videos/screensaver.mp4"
+  autoPlay
+  loop
+  muted
+  style={{
+    position: "absolute",
+    top: "0",
+    left: "0",
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    opacity: "1",
+    transition: "opacity 1s ease-in-out",
+  }}
+/>
       </div>
 
       {/* Avatar video and new background */}
