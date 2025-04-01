@@ -134,7 +134,7 @@ export default function InteractiveAvatar() {
       const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement;
       if (mainOneDiv) mainOneDiv.style.opacity = "1"; // Fade in main video
       if (videoBackground) videoBackground.style.opacity = "1"; // Fade in background video
-    }, 2000);
+    }, 3000);
   
     // Remove GIF after 4 seconds and show buttons after the GIF
     setTimeout(() => {
@@ -205,17 +205,16 @@ export default function InteractiveAvatar() {
     };
 
 
-    async function endSession() {
-      // Check if the session is already started
-      if (!avatar.current) return;
-    
-      // Step 1: Show the GIF transition only if the session has been started
-      if (stream) {
-        showCloseSessionGif();  // Show GIF only if the stream is available (i.e., session has started)
-      }
-   
-    }
-    
+   async function endSession() {
+  if (!avatar.current) return;
+
+  if (stream) {
+    showCloseSessionGif(); // Show the GIF transition
+    await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for 4 seconds
+    completeEndSession(); // End the session after the GIF transition
+  }
+}
+
    
 
 
