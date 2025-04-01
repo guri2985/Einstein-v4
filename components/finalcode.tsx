@@ -359,23 +359,22 @@ export default function InteractiveAvatar() {
       <Card>
         <CardBody>
           {!stream && !isLoadingSession ? (
-            <motion.div
-            initial={{ scale: .5, opacity: 1 }}
-            animate={{ scale: [1, 1.1, 1], opacity: 1 }}
-            transition={{
-              duration: 1,
-              ease: "easeInOut",
-              repeat: Infinity,
-              repeatType: "reverse",
-            }}
-          ><Button 
-          className="bg-gradient-to-tr from-[#ff1c1b] to-[#f73e3d] w-full text-white text-[17px] py-[26px] px-[30px]"
-          size="md"
-          variant="shadow"
+          <Button 
+          className=" w-full text-white bg-main"
+          size="lg"
           onClick={startSession}
+          style={{
+            backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Startbutton.png")',
+            backgroundSize: 'cover',  // Ensure the image covers the entire button
+            backgroundPosition: 'center',  // Center the image in the button
+            backgroundRepeat: 'no-repeat',  // Ensure the image doesn't repeat
+            backgroundColor:'transparent',
+            width:'260px',
+            height:'100px',
+          }}
         >
-              Start session
-            </Button> </motion.div>
+           
+            </Button> 
           ) : isLoadingSession ? (
             <Spinner color="default" size="lg" />
           ) : (
@@ -384,12 +383,20 @@ export default function InteractiveAvatar() {
                 <>
                  
                   <Button
-                    className="bg-gradient-to-tr from-[#ff1c1b] to-[#f73e3d] text-white rounded-lg text-[17px] py-[26px] px-[30px]"
-                    size="md"
-                    variant="shadow"
+                    className="bg-main"
+                    size="lg"
                     onClick={endSession}
+                    style={{
+                      backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Endbutton.png")',
+                      backgroundSize: 'cover',  // Ensure the image covers the entire button
+                      backgroundPosition: 'center',  // Center the image in the button
+                      backgroundRepeat: 'no-repeat',  // Ensure the image doesn't repeat
+                      backgroundColor:'transparent',
+                      width:'260px',
+                      height:'100px',
+                    }}
                   >
-                    End session
+                  
                   </Button>
                 </>
               )}

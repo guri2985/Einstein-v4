@@ -359,7 +359,17 @@ export default function InteractiveAvatar() {
       <Card>
         <CardBody>
           {!stream && !isLoadingSession ? (
-          <Button 
+          
+<motion.div
+            initial={{ scale: .1, opacity: 1 }}
+            animate={{ scale: [1, 1.03, 1], opacity: 1 }}
+            transition={{
+              duration: 1,
+              ease: "easeInOut",
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+          ><Button 
           className=" w-full text-white bg-main"
           size="lg"
           onClick={startSession}
@@ -372,9 +382,9 @@ export default function InteractiveAvatar() {
             width:'260px',
             height:'100px',
           }}
-        >
+        >  
            
-            </Button> 
+            </Button> </motion.div>
           ) : isLoadingSession ? (
             <Spinner color="default" size="lg" />
           ) : (
