@@ -122,7 +122,7 @@ const startSessionTransition = () => {
 
   // Create the GIF image for transition
   const gifImage = document.createElement("img");
-  gifImage.src = "https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Transitions_Pixel_vertical-In.gif"; // Your GIF source
+  gifImage.src = "https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/pixels_once.gif"; 
   gifImage.style.position = "absolute";
   gifImage.style.left = "0";
   gifImage.style.width = "100%";
@@ -157,7 +157,7 @@ const startSessionTransition = () => {
 
     // Delay showing the buttons after GIF removal
     setButtonsVisible(true); // Show buttons after GIF removal
-  }, 4000);
+  }, 2000);
 };
 
   
@@ -282,7 +282,6 @@ const startSessionTransition = () => {
         setStream(undefined);
         setMaskVisible(false);
     
-        // Show Start Session button after 2 seconds
         setTimeout(() => {
           setButtonsVisible(true);
         }, 1000);
