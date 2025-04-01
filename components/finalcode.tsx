@@ -122,7 +122,7 @@ const startSessionTransition = () => {
 
   // Create the GIF image for transition
   const gifImage = document.createElement("img");
-  gifImage.src = "https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Transitions_Pixel_vertical-In.gif"; // Your GIF source
+  gifImage.src = "https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/pixels_once.gif"; 
   gifImage.style.position = "absolute";
   gifImage.style.left = "0";
   gifImage.style.width = "100%";
@@ -157,7 +157,7 @@ const startSessionTransition = () => {
 
     // Delay showing the buttons after GIF removal
     setButtonsVisible(true); // Show buttons after GIF removal
-  }, 4000);
+  }, 2000);
 };
 
   
@@ -236,7 +236,7 @@ const startSessionTransition = () => {
       if (stream) {
         setButtonsVisible(false); // Hide the End Session button
         showCloseSessionGif(); // Show the GIF transition
-        await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait for 3 seconds
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for 3 seconds
         completeEndSession(); // End the session after the GIF transition
       }
     
@@ -249,7 +249,7 @@ const startSessionTransition = () => {
           screensaverVideo.load(); // Force reload
           screensaverVideo.play(); // Ensure it starts playing again
         }
-      }, 4000); // Restart screensaver after transition
+      }, 0); // Restart screensaver after transition
     }
     
 
@@ -282,7 +282,6 @@ const startSessionTransition = () => {
         setStream(undefined);
         setMaskVisible(false);
     
-        // Show Start Session button after 2 seconds
         setTimeout(() => {
           setButtonsVisible(true);
         }, 1000);
@@ -400,15 +399,15 @@ const startSessionTransition = () => {
           {!stream && !isLoadingSession ? (
           
 <motion.div
-            initial={{ scale: .1, opacity: 1 }}
-            animate={{ scale: [1, 1.03, 1], opacity: 1 }}
-            transition={{
-              duration: 1,
-              ease: "easeInOut",
-              repeat: Infinity,
-              repeatType: "reverse",
-            }}
-          ><Button 
+  initial={{ scale: 1, opacity: 1 }}  // Start at normal size
+  animate={{ scale: [1, 1.03, 1], opacity: 1 }} 
+  transition={{
+    duration: 1,
+    ease: "easeInOut",
+    repeat: Infinity,
+    repeatType: "reverse",
+  }}
+><Button 
           className=" w-full text-white bg-main"
           size="lg"
           onClick={startSession}
@@ -431,7 +430,11 @@ const startSessionTransition = () => {
             <>
               {buttonsVisible && (
                 <>
-                 
+                   <motion.div
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ duration: 0.3, ease: "easeOut" }}
+  >
                   <Button
                     className="bg-main"
                     size="lg"
@@ -447,7 +450,7 @@ const startSessionTransition = () => {
                     }}
                   >
                   
-                  </Button>
+                  </Button> </motion.div>
                 </>
               )}
             </>
