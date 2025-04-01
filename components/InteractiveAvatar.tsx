@@ -400,15 +400,15 @@ const startSessionTransition = () => {
           {!stream && !isLoadingSession ? (
           
 <motion.div
-            initial={{ scale: .1, opacity: 1 }}
-            animate={{ scale: [1, 1.03, 1], opacity: 1 }}
-            transition={{
-              duration: 1,
-              ease: "easeInOut",
-              repeat: Infinity,
-              repeatType: "reverse",
-            }}
-          ><Button 
+  initial={{ scale: 1, opacity: 1 }}  // Start at normal size
+  animate={{ scale: [1, 1.03, 1], opacity: 1 }} 
+  transition={{
+    duration: 1,
+    ease: "easeInOut",
+    repeat: Infinity,
+    repeatType: "reverse",
+  }}
+><Button 
           className=" w-full text-white bg-main"
           size="lg"
           onClick={startSession}
