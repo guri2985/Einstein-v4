@@ -52,6 +52,7 @@ display:none;
   background-color: white !important; /* Ensure the background color turns to white */
   transition: background-color 2s ease-out; /* Smooth transition */
 }
+
 .main-wrapper {
   display: flex;
   justify-content: end;
@@ -112,5 +113,5 @@ height:100%;
 }
 .bg-main {
   margin-top: 200px;
-  margin-right: 0px;
+  margin-right: 20px;
 }

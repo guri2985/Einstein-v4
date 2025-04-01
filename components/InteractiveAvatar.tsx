@@ -20,9 +20,11 @@ import {
 } from "@nextui-org/react";
 import { useEffect, useRef, useState } from "react";
 import { useMemoizedFn, usePrevious } from "ahooks";
-
+import LoadingScreen from "./LoadingScreen"; // Import the LoadingScreen component
 import InteractiveAvatarTextInput from "./InteractiveAvatarTextInput";
 import { AVATARS, STT_LANGUAGE_LIST } from "@/app/lib/constants";
+
+
 
 export default function InteractiveAvatar() {
   const [isLoadingSession, setIsLoadingSession] = useState(false);
@@ -112,7 +114,7 @@ export default function InteractiveAvatar() {
   const startSessionTransition = () => {
     // Create the GIF image for transition
     const gifImage = document.createElement("img");
-    gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif"; // Your GIF source
+    gifImage.src = "https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Transitions_Pixel_vertical-In.gif"; // Your GIF source
     gifImage.style.position = "absolute";
     gifImage.style.left = "0";
     gifImage.style.width = "100%";
@@ -122,7 +124,7 @@ export default function InteractiveAvatar() {
     gifImage.style.zIndex = "1000"; // On top of everything else
   
     // Get the main container where everything will be added
-    const mainUpDiv = document.querySelector(".main-up");
+    const mainUpDiv = document.querySelector(".main-one");
   
     // Append the GIF to the main-up container
     if (mainUpDiv) {
@@ -135,7 +137,7 @@ export default function InteractiveAvatar() {
       const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement;
       if (mainOneDiv) mainOneDiv.style.opacity = "1"; // Fade in main video
       if (videoBackground) videoBackground.style.opacity = "1"; // Fade in background video
-    }, 3000);
+    }, 0);
   
     // Remove GIF after 4 seconds and show buttons after the GIF
     setTimeout(() => {
@@ -295,8 +297,11 @@ export default function InteractiveAvatar() {
     }
   }, [mediaStream, stream]);
 
+
+  
   return (
     <div className="main-wrapper" style={{ position: "relative" }}>
+      
       {/* Default screensaver video */}
       <div className="main-up" style={{ height: "100%" }}>
         <video
@@ -386,7 +391,8 @@ export default function InteractiveAvatar() {
            
             </Button> </motion.div>
           ) : isLoadingSession ? (
-            <Spinner color="default" size="lg" />
+           
+           <LoadingScreen onComplete={() => setIsLoadingSession(false)} isLoadingSession={isLoadingSession} />
           ) : (
             <>
               {buttonsVisible && (

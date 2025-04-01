@@ -20,9 +20,11 @@ import {
 } from "@nextui-org/react";
 import { useEffect, useRef, useState } from "react";
 import { useMemoizedFn, usePrevious } from "ahooks";
-
+import LoadingScreen from "./LoadingScreen"; // Import the LoadingScreen component
 import InteractiveAvatarTextInput from "./InteractiveAvatarTextInput";
 import { AVATARS, STT_LANGUAGE_LIST } from "@/app/lib/constants";
+
+
 
 export default function InteractiveAvatar() {
   const [isLoadingSession, setIsLoadingSession] = useState(false);
@@ -295,8 +297,11 @@ export default function InteractiveAvatar() {
     }
   }, [mediaStream, stream]);
 
+
+  
   return (
     <div className="main-wrapper" style={{ position: "relative" }}>
+      
       {/* Default screensaver video */}
       <div className="main-up" style={{ height: "100%" }}>
         <video
@@ -359,7 +364,17 @@ export default function InteractiveAvatar() {
       <Card>
         <CardBody>
           {!stream && !isLoadingSession ? (
-          <Button 
+          
+<motion.div
+            initial={{ scale: .1, opacity: 1 }}
+            animate={{ scale: [1, 1.03, 1], opacity: 1 }}
+            transition={{
+              duration: 1,
+              ease: "easeInOut",
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+          ><Button 
           className=" w-full text-white bg-main"
           size="lg"
           onClick={startSession}
@@ -372,11 +387,12 @@ export default function InteractiveAvatar() {
             width:'260px',
             height:'100px',
           }}
-        >
+        >  
            
-            </Button> 
+            </Button> </motion.div>
           ) : isLoadingSession ? (
-            <Spinner color="default" size="lg" />
+           
+           <LoadingScreen onComplete={() => setIsLoadingSession(false)} isLoadingSession={isLoadingSession} />
           ) : (
             <>
               {buttonsVisible && (
