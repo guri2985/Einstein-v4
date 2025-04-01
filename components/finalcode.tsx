@@ -1,4 +1,5 @@
 import type { StartAvatarResponse } from "@heygen/streaming-avatar";
+import { motion } from "framer-motion";
 import StreamingAvatar, {
   AvatarQuality,
   StreamingEvents,
@@ -134,7 +135,7 @@ export default function InteractiveAvatar() {
       const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement;
       if (mainOneDiv) mainOneDiv.style.opacity = "1"; // Fade in main video
       if (videoBackground) videoBackground.style.opacity = "1"; // Fade in background video
-    }, 2000);
+    }, 3000);
   
     // Remove GIF after 4 seconds and show buttons after the GIF
     setTimeout(() => {
@@ -171,38 +172,91 @@ export default function InteractiveAvatar() {
     });
   }
 
-  async function endSession() {
-    if (!avatar.current) return;
+
   
-    // Start the fade-out effect on avatar and background videos
-    const avatarVideo = document.querySelector(".avatar-stream") as HTMLVideoElement;
-    const backgroundVideo = document.querySelector("#main-video1") as HTMLVideoElement;
-    const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
-  
-    // Apply fade-out transition to avatar and background videos
-    if (avatarVideo && backgroundVideo) {
-      avatarVideo.style.transition = "opacity 1s ease-out";  // Smooth fade-out for avatar
-      backgroundVideo.style.transition = "opacity 1s ease-out";  // Smooth fade-out for background
-  
-      avatarVideo.style.opacity = "0";  // Fade out avatar
-      backgroundVideo.style.opacity = "0";  // Fade out background
+    // Function to show GIF on close session
+    const showCloseSessionGif = () => {
+      // Create the GIF image for transition
+      const gifImage = document.createElement("img");
+      gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif"; // Your GIF source
+      gifImage.style.position = "absolute";
+      gifImage.style.left = "0";
+      gifImage.style.width = "100%";
+      gifImage.style.height = "100%";
+      gifImage.style.top = "0";
+      gifImage.style.opacity = "1"; // Ensure it is visible immediately
+      gifImage.style.zIndex = "1000"; // On top of everything else
+    
+      // Get the main container where everything will be added
+      const mainUpDiv = document.querySelector(".main-up");
+    
+      // Append the GIF to the main-up container
+      if (mainUpDiv) {
+        mainUpDiv.appendChild(gifImage);
+      }
+    
+      // Remove GIF after 4 seconds and trigger session end
+      setTimeout(() => {
+        if (gifImage.parentElement) {
+          gifImage.parentElement.removeChild(gifImage); // Remove GIF after it plays once
+        }
+        // Proceed with ending the session
+        completeEndSession();
+      }, 4000);
+    };
+
+
+    async function endSession() {
+      if (!avatar.current) return;
+    
+      if (stream) {
+        setButtonsVisible(false); // Instantly hide the End Session button
+        showCloseSessionGif(); // Show the GIF transition
+        await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait for 4 seconds
+        completeEndSession(); // End the session after the GIF transition
+      }
     }
-  
-    // Apply fade-out effect to the .main-one container as well
-    if (mainOneDiv) {
-      mainOneDiv.style.transition = "opacity 1s ease-out";  // Smooth fade-out for .main-one
-      mainOneDiv.style.opacity = "0";  // Fade out entire container
+    
+
+   
+
+
+    // Function to complete session end after GIF
+    async function completeEndSession() {
+      if (!avatar.current) return;
+    
+      // Start the fade-out effect on avatar and background videos
+      const avatarVideo = document.querySelector(".avatar-stream") as HTMLVideoElement;
+      const backgroundVideo = document.querySelector("#main-video1") as HTMLVideoElement;
+      const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
+    
+      if (avatarVideo && backgroundVideo) {
+        avatarVideo.style.transition = "opacity 0s ease-out";
+        backgroundVideo.style.transition = "opacity 0s ease-out";
+        avatarVideo.style.opacity = "0";
+        backgroundVideo.style.opacity = "0";
+      }
+    
+      if (mainOneDiv) {
+        mainOneDiv.style.transition = "opacity 0s ease-out";
+        mainOneDiv.style.opacity = "0";
+      }
+    
+      setTimeout(async () => {
+        await avatar.current?.stopAvatar();
+        setStream(undefined);
+        setMaskVisible(false);
+    
+        // Show Start Session button after 2 seconds
+        setTimeout(() => {
+          setButtonsVisible(true);
+        }, 1000);
+    
+      }, 1000);
     }
-  
-    // Wait for the fade-out to complete (2 seconds in this case) before stopping the session
-    setTimeout(async () => {
-      // Now stop the session after the fade-out effect completes
-      await avatar.current?.stopAvatar();
-      setStream(undefined);
-      setMaskVisible(false);
-    }, 1000);  // Matches the fade-out duration
-  }
-  
+    
+    
+ 
 
   const handleChangeChatMode = useMemoizedFn(async (v) => {
     if (v === chatMode) {
@@ -258,13 +312,13 @@ export default function InteractiveAvatar() {
             height: "100%",
             objectFit: "cover",
             opacity: "1",
-            transition: "opacity .5s ease-in-out",
+            transition: "opacity 1s ease-in-out",
           }}
         />
       </div>
 
       {/* Avatar video and new background */}
-      <div className="main-one" style={{ opacity: "0", transition: "opacity 1s ease-in-out" }}>
+      <div className="main-one" style={{ opacity: "0", transition: "opacity 0s ease-in-out" }}>
       <video
   id="main-video1"
   src="https://ounocreatstg.wpenginepowered.com/videos/main-video.mp4"
@@ -293,8 +347,8 @@ export default function InteractiveAvatar() {
           style={{
             objectFit: "contain",
               position: "absolute",
-              top: "337px",
-              left: "50.5%",
+              top: "332px",
+              left: "50.7%",
               transform: "translate(-50%, -50%)",  // Centers the avatar on the screen
               width:"1010px",
           }}
@@ -305,14 +359,23 @@ export default function InteractiveAvatar() {
       <Card>
         <CardBody>
           {!stream && !isLoadingSession ? (
-            <Button
-              className="bg-gradient-to-tr from-indigo-500 to-indigo-300 w-full text-white"
-              size="md"
-              variant="shadow"
-              onClick={startSession}
-            >
+            <motion.div
+            initial={{ scale: .5, opacity: 1 }}
+            animate={{ scale: [1, 1.1, 1], opacity: 1 }}
+            transition={{
+              duration: 1,
+              ease: "easeInOut",
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+          ><Button 
+          className="bg-gradient-to-tr from-[#ff1c1b] to-[#f73e3d] w-full text-white text-[17px] py-[26px] px-[30px]"
+          size="md"
+          variant="shadow"
+          onClick={startSession}
+        >
               Start session
-            </Button>
+            </Button> </motion.div>
           ) : isLoadingSession ? (
             <Spinner color="default" size="lg" />
           ) : (
@@ -321,7 +384,7 @@ export default function InteractiveAvatar() {
                 <>
                  
                   <Button
-                    className="bg-gradient-to-tr from-indigo-500 to-indigo-300  text-white rounded-lg"
+                    className="bg-gradient-to-tr from-[#ff1c1b] to-[#f73e3d] text-white rounded-lg text-[17px] py-[26px] px-[30px]"
                     size="md"
                     variant="shadow"
                     onClick={endSession}
