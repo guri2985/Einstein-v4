@@ -134,7 +134,7 @@ export default function InteractiveAvatar() {
       const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement;
       if (mainOneDiv) mainOneDiv.style.opacity = "1"; // Fade in main video
       if (videoBackground) videoBackground.style.opacity = "1"; // Fade in background video
-    }, 3000);
+    }, 2000);
   
     // Remove GIF after 4 seconds and show buttons after the GIF
     setTimeout(() => {
@@ -201,19 +201,21 @@ export default function InteractiveAvatar() {
         }
         // Proceed with ending the session
         completeEndSession();
-      }, 3000);
+      }, 4000);
     };
 
 
-   async function endSession() {
-  if (!avatar.current) return;
-
-  if (stream) {
-    showCloseSessionGif(); // Show the GIF transition
-    await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for 4 seconds
-    completeEndSession(); // End the session after the GIF transition
-  }
-}
+    async function endSession() {
+      if (!avatar.current) return;
+    
+      if (stream) {
+        setButtonsVisible(false); // Instantly hide the End Session button
+        showCloseSessionGif(); // Show the GIF transition
+        await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait for 4 seconds
+        completeEndSession(); // End the session after the GIF transition
+      }
+    }
+    
 
    
 
@@ -243,8 +245,15 @@ export default function InteractiveAvatar() {
         await avatar.current?.stopAvatar();
         setStream(undefined);
         setMaskVisible(false);
-      }, 4000);
+    
+        // Show Start Session button after 2 seconds
+        setTimeout(() => {
+          setButtonsVisible(true);
+        }, 1000);
+    
+      }, 1000);
     }
+    
     
  
 
