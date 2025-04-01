@@ -236,7 +236,7 @@ const startSessionTransition = () => {
       if (stream) {
         setButtonsVisible(false); // Hide the End Session button
         showCloseSessionGif(); // Show the GIF transition
-        await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait for 3 seconds
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for 3 seconds
         completeEndSession(); // End the session after the GIF transition
       }
     
@@ -249,7 +249,7 @@ const startSessionTransition = () => {
           screensaverVideo.load(); // Force reload
           screensaverVideo.play(); // Ensure it starts playing again
         }
-      }, 4000); // Restart screensaver after transition
+      }, 0); // Restart screensaver after transition
     }
     
 
@@ -431,7 +431,11 @@ const startSessionTransition = () => {
             <>
               {buttonsVisible && (
                 <>
-                 
+                   <motion.div
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ duration: 0.3, ease: "easeOut" }}
+  >
                   <Button
                     className="bg-main"
                     size="lg"
@@ -447,7 +451,7 @@ const startSessionTransition = () => {
                     }}
                   >
                   
-                  </Button>
+                  </Button> </motion.div>
                 </>
               )}
             </>
