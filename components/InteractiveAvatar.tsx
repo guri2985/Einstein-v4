@@ -100,6 +100,16 @@ export default function InteractiveAvatar() {
       await avatar.current?.startVoiceChat({
         useSilencePrompt: false,
       });
+  
+    // Make the avatar speak immediately by default
+const initialSpeech = "Hello, I am your interactive avatar. Let's begin!"; // Customize this message
+await avatar.current.speak({
+  text: initialSpeech,
+  // You can either remove the TaskType and TaskMode or check their correct values
+  // Assuming no TaskType or TaskMode is needed, or their names might be different.
+});
+
+  
       setChatMode("voice_mode");
     } catch (error) {
       console.error("Error starting avatar session:", error);
@@ -109,7 +119,7 @@ export default function InteractiveAvatar() {
   
     startSessionTransition();
   }
-
+  
   // Start the session transition with GIF and fade-in effects
   let isGifLoaded = false; // A flag to track if the GIF is loaded or not
 
