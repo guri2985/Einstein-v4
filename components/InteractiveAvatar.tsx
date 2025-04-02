@@ -93,7 +93,7 @@ export default function InteractiveAvatar() {
           emotion: VoiceEmotion.EXCITED,
         },
         language: language,
-        disableIdleTimeout: true,
+        disableIdleTimeout: false,
       });
   
       setData(res);
