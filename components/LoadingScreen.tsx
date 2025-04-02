@@ -31,30 +31,40 @@ export default function LoadingScreen({ onComplete, isLoadingSession }: LoadingS
       initial={{ opacity: 1 }}
       animate={{ opacity: !isLoadingSession ? 0 : 1 }}
       transition={{ duration: 0.5 }}
-      className="fixed inset-0 flex flex-col items-center justify-center bg-white text-white text-4xl font-bold z-50"
+      className="fixed inset-0 flex items-center justify-center bg-white text-white text-4xl font-bold z-50"
+      style={{
+        width: '1080px',
+        height: '1920px',
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)', // Center the loading screen
+      }}
     >
-      {/* Image above the progress bar */}
-      <img 
-        src="https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/thumbnail_Initialising-text.png"
-        alt="Initializing..."
-        className="mb-4 w-[500px] h-auto"
-      />
-
-      {/* Progress Bar */}
-      <div className="w-[450px] h-5 bg-gray-300 rounded-full overflow-hidden meter relative">
-        <div
-          className="h-full bg-red-500 transition-all duration-200 ease-in-out relative"
-          style={{
-            width: `${progress}%`,
-            backgroundImage: `repeating-linear-gradient(
-              -45deg,
-rgb(243, 116, 116),
-              rgb(243, 116, 116),10px,
-#f42323 10px,
-              #f42323 20px
-            )`,
-          }}
+      {/* Flex container to stack image and progress bar vertically */}
+      <div className="flex flex-col items-center justify-center space-y-4">
+        {/* Image above the progress bar */}
+        <img 
+          src="https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/thumbnail_Initialising-text.png"
+          alt="Initializing..."
+          className="w-[500px] h-auto"
         />
+
+        {/* Progress Bar */}
+        <div className="w-[450px] h-5 bg-gray-300 rounded-full overflow-hidden meter relative">
+          <div
+            className="h-full bg-red-500 transition-all duration-200 ease-in-out relative"
+            style={{
+              width: `${progress}%`,
+              backgroundImage: `repeating-linear-gradient(
+                -45deg,
+                rgb(243, 116, 116),
+                rgb(243, 116, 116),10px,
+                #f42323 10px,
+                #f42323 20px
+              )`,
+            }}
+          />
+        </div>
       </div>
     </motion.div>
   );
