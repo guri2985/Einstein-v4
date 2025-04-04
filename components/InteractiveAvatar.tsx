@@ -217,6 +217,23 @@ const handleTimeoutEndSession = () => {
 };
 
 
+useEffect(() => {
+  // Function to handle the session end when the page is about to unload (e.g., reload or navigate away)
+  const handleBeforeUnload = () => {
+    endSession(); // Call the endSession function to close the session properly
+  };
+
+  // Add the event listener for beforeunload
+  window.addEventListener("beforeunload", handleBeforeUnload);
+
+  // Cleanup the event listener and session when the component is unmounted or before reload
+  return () => {
+    window.removeEventListener("beforeunload", handleBeforeUnload);
+    endSession(); // Ensure session is ended properly on unmount
+  };
+}, []); // Empty dependency array ensures this effect runs only once (on component mount)
+
+
 // Automatically trigger session end when timeout occurs
 useEffect(() => {
   if (sessionTimeout) {
@@ -231,28 +248,33 @@ useEffect(() => {
 
 
 // Add logic to hide the avatar and .main-one div when the session ends
-async function endSession() {
+const endSession = async () => {
   if (!avatar.current) return;
 
-  if (stream) {
-    setButtonsVisible(false); // Hide the End Session button
-    showCloseSessionGif(); // Show the GIF transition
-    await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for 2 seconds
-    completeEndSession(); // End the session after the GIF transition
+  // Stop any ongoing streams or interactions
+  await avatar.current.stopAvatar(); // Ensure avatar stops the session
+
+  // Clear timeouts to prevent session from being reset unintentionally
+  if (sessionTimeout) {
+    clearTimeout(sessionTimeout);
   }
 
-  // **Force Restart of Screensaver Video**
-  setTimeout(() => {
-    const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
-    if (screensaverVideo) {
-      screensaverVideo.pause();  // Pause in case it's playing
-      screensaverVideo.currentTime = 0; // Restart from beginning
-      screensaverVideo.load(); // Force reload
-      screensaverVideo.play(); // Ensure it starts playing again
-    }
-  }, 0); // Restart screensaver after transition
-}
+  // Hide elements and perform necessary cleanup
+  setButtonsVisible(false);
+  setStream(undefined);
+  setMaskVisible(false);
   
+  // Reset videos and other session-related UI elements
+  setTimeout(() => {
+    const avatarVideo = document.querySelector(".avatar-stream") as HTMLVideoElement;
+    const backgroundVideo = document.querySelector("#main-video1") as HTMLVideoElement;
+
+    if (avatarVideo) avatarVideo.style.opacity = "0";
+    if (backgroundVideo) backgroundVideo.style.opacity = "0";
+  }, 1000);
+
+  // You can also restart the screensaver or video here if needed.
+};
     // Function to show GIF on session end (both button click and timeout)
     const showCloseSessionGif = () => {
       // Create the GIF image for transition
