@@ -49,6 +49,8 @@ export default function InteractiveAvatar() {
   const [sessionTimeout, setSessionTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isEndingSession, setIsEndingSession] = useState(false);
   const [isChatEnded, setIsChatEnded] = useState(false);
+  const [sessionEnded, setSessionEnded] = useState(false);
+  const hasEndedRef = useRef(false);
 
   function baseApiUrl() {
     return process.env.NEXT_PUBLIC_BASE_API_URL;
@@ -69,8 +71,12 @@ export default function InteractiveAvatar() {
   }
 
 
-  async function startSession() {
+  const startSession = async () => {
+    if (sessionTimeout) clearTimeout(sessionTimeout);
+setSessionTimeout(null);
+    setSessionEnded(false);
     setIsLoadingSession(true);
+    hasEndedRef.current = false;
     const newToken = await fetchAccessToken();
   
     avatar.current = new StreamingAvatar({
@@ -201,11 +207,11 @@ const startSessionTransition = () => {
   }
 
   const handleTimeoutEndSession = () => {
-    showCloseSessionGif();  // Show GIF transition before ending the session
-  
+    if (hasEndedRef.current) return; // prevent double-trigger
+    showCloseSessionGif();
     setTimeout(() => {
-      endSession();  // Proceed with ending session after GIF transition
-    }, 4000);  // Wait 4 seconds after GIF before ending session
+      endSession();
+    }, 4000);
   };
 
 useEffect(() => {
@@ -239,28 +245,31 @@ useEffect(() => {
 
 // Add logic to hide the avatar and .main-one div when the session ends
 const endSession = async () => {
-  if (!avatar.current) return;
+  if (hasEndedRef.current || !avatar.current) return;
+  hasEndedRef.current = true;
 
-  await avatar.current.stopAvatar();
+  console.log("Ending session...");
 
-  if (sessionTimeout) {
-    clearTimeout(sessionTimeout);
+  try {
+    await avatar.current.stopAvatar();
+  } catch (error) {
+    console.warn("Error while stopping avatar:", error);
   }
 
+  if (sessionTimeout) clearTimeout(sessionTimeout);
+  setSessionEnded(true);
   setButtonsVisible(false);
   setStream(undefined);
   setMaskVisible(false);
 
-  // Reset videos immediately
+  // Hide avatar & background videos
   const avatarVideo = document.querySelector(".avatar-stream") as HTMLVideoElement;
   const backgroundVideo = document.querySelector("#main-video1") as HTMLVideoElement;
   const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
 
-  // Hide avatar and background videos immediately
   if (avatarVideo) avatarVideo.style.opacity = "0";
   if (backgroundVideo) backgroundVideo.style.opacity = "0";
 
-  // Reset screensaver video instantly
   if (screensaverVideo) {
     screensaverVideo.pause();
     screensaverVideo.currentTime = 0;
@@ -270,7 +279,7 @@ const endSession = async () => {
 };
 
 
-    
+
 const showCloseSessionGif = () => {
   // Create the GIF image
   const gifImage = document.createElement("img");
@@ -317,7 +326,7 @@ setTimeout(() => {
 }, 0); // 2000 milliseconds = 2 seconds
 
 
-}, 4000); // Wait for the GIF to finish (4 seconds) before starting the 2-second delay
+},4000); // Wait for the GIF to finish (4 seconds) before starting the 2-second delay
 };
 
 
