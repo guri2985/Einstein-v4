@@ -71,6 +71,8 @@ export default function InteractiveAvatar() {
       basePath: baseApiUrl(),
     });
   
+    
+
     avatar.current.on(StreamingEvents.STREAM_READY, (event) => {
       console.log(">>>>> Stream ready:", event.detail);
       setStream(event.detail);
@@ -82,31 +84,36 @@ export default function InteractiveAvatar() {
         avatarVideo.style.opacity = "1";
       }
     });
-  
-    try {
-      const res = await avatar.current.createStartAvatar({
-        quality: AvatarQuality.High,
-        avatarName: "8cb79c7f37d1430d96edc1402fea67b0",
-        knowledgeId: knowledgeId,
-        voice: {
-          rate: 1.5,
-          emotion: VoiceEmotion.EXCITED,
-        },
-        language: language,
-        disableIdleTimeout: true,
-      });
-  
+
+
+      try {
+        const res = await avatar.current.createStartAvatar({
+          quality: AvatarQuality.High,
+          avatarName: "8cb79c7f37d1430d96edc1402fea67b0",
+          knowledgeId: knowledgeId, // Or use a custom `knowledgeBase`.
+          voice: {
+            rate: 1, // 0.5 ~ 1.5
+            emotion: VoiceEmotion.EXCITED,
+            elevenlabsSettings: {
+               stability: 1,
+            similarity_boost: 1,
+            style: 1,
+            use_speaker_boost: false,
+            },
+          },
+          language: language,
+          disableIdleTimeout: false,
+        });
       setData(res);
       await avatar.current?.startVoiceChat({
-        useSilencePrompt: false,
+        useSilencePrompt: true,
       });
   
     // Make the avatar speak immediately by default
-const initialSpeech = "Hello, I am your interactive avatar. Let's begin!"; // Customize this message
-await avatar.current.speak({
-  text: initialSpeech,
-  // You can either remove the TaskType and TaskMode or check their correct values
-  // Assuming no TaskType or TaskMode is needed, or their names might be different.
+   const initialSpeech = "Hello, I am your interactive avatar. Let's begin!"; 
+   await avatar.current.speak({
+    text: initialSpeech,
+
 });
 
   
@@ -121,7 +128,7 @@ await avatar.current.speak({
   }
   
   // Start the session transition with GIF and fade-in effects
-  let isGifLoaded = false; // A flag to track if the GIF is loaded or not
+  let isGifLoaded = false; 
 
 // Start the session transition with GIF and fade-in effects
 const startSessionTransition = () => {
