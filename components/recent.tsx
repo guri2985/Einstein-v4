@@ -106,7 +106,7 @@ export default function InteractiveAvatar() {
         });
       setData(res);
       await avatar.current?.startVoiceChat({
-        useSilencePrompt: true,
+        useSilencePrompt: false,
       });
   
     // Make the avatar speak immediately by default
@@ -247,61 +247,27 @@ const startSessionTransition = () => {
       }
     }, []);
     
-    async function endSession(isAutoEnd?: boolean) {
-      const autoEnd = typeof isAutoEnd === "boolean" ? isAutoEnd : false;
-    
+    async function endSession() {
       if (!avatar.current) return;
     
       if (stream) {
-        setButtonsVisible(false);
-    
-        const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
-        if (mainOneDiv) {
-          mainOneDiv.style.transition = "opacity 1s ease-out";
-          mainOneDiv.style.opacity = "0";
-        }
-    
-        const gifImage = document.createElement("img");
-        gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif";
-        gifImage.style.position = "absolute";
-        gifImage.style.left = "0";
-        gifImage.style.top = "0";
-        gifImage.style.width = "100%";
-        gifImage.style.height = "100%";
-        gifImage.style.zIndex = "1000";
-        gifImage.style.opacity = "1";
-    
-        const mainWrapper = document.querySelector(".main-wrapper");
-        if (mainWrapper) {
-          mainWrapper.appendChild(gifImage);
-        }
-    
-        await new Promise((resolve) => setTimeout(resolve, 4000));
-    
-        if (gifImage.parentElement) {
-          gifImage.parentElement.removeChild(gifImage);
-        }
-    
-        const mainUpDiv = document.querySelector(".main-up") as HTMLElement;
-        if (mainUpDiv) {
-          mainUpDiv.style.opacity = "1";
-          mainUpDiv.style.transition = "opacity 1s ease-in";
-        }
-    
-        await completeEndSession();
+        setButtonsVisible(false); // Hide the End Session button
+        showCloseSessionGif(); // Show the GIF transition
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for 3 seconds
+        completeEndSession(); // End the session after the GIF transition
       }
     
+      // **Force Restart of Screensaver Video**
       setTimeout(() => {
         const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
         if (screensaverVideo) {
-          screensaverVideo.pause();
-          screensaverVideo.currentTime = 0;
-          screensaverVideo.load();
-          screensaverVideo.play();
+          screensaverVideo.pause();  // Pause in case it's playing
+          screensaverVideo.currentTime = 0; // Restart from beginning
+          screensaverVideo.load(); // Force reload
+          screensaverVideo.play(); // Ensure it starts playing again
         }
-      }, 0);
+      }, 0); // Restart screensaver after transition
     }
-    
     
 
    
@@ -486,21 +452,22 @@ const startSessionTransition = () => {
     animate={{ opacity: 1, scale: 1 }}
     transition={{ duration: 0.3, ease: "easeOut" }}
   >
-               <Button
-  className="bg-main"
-  size="lg"
-  onClick={() => endSession(false)} // Explicitly call with false
-  style={{
-    backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Endbutton.png")',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    backgroundColor: 'transparent',
-    width: '260px',
-    height: '100px',
-  }}
->
-</Button> </motion.div>
+                  <Button
+                    className="bg-main"
+                    size="lg"
+                    onClick={endSession}
+                    style={{
+                      backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Endbutton.png")',
+                      backgroundSize: 'cover',  // Ensure the image covers the entire button
+                      backgroundPosition: 'center',  // Center the image in the button
+                      backgroundRepeat: 'no-repeat',  // Ensure the image doesn't repeat
+                      backgroundColor:'transparent',
+                      width:'260px',
+                      height:'100px',
+                    }}
+                  >
+                  
+                  </Button> </motion.div>
                 </>
               )}
             </>
