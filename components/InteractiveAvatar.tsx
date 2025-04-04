@@ -27,6 +27,8 @@ import { AVATARS, STT_LANGUAGE_LIST } from "@/app/lib/constants";
 
 
 export default function InteractiveAvatar() {
+
+ 
   const [isLoadingSession, setIsLoadingSession] = useState(false);
   const [isLoadingRepeat, setIsLoadingRepeat] = useState(false);
   const [stream, setStream] = useState<MediaStream>();
@@ -45,6 +47,9 @@ export default function InteractiveAvatar() {
 
   const [buttonsVisible, setButtonsVisible] = useState(false);  // State to manage button visibility
   const [sessionTimeout, setSessionTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [isEndingSession, setIsEndingSession] = useState(false);
+  const [isChatEnded, setIsChatEnded] = useState(false);
+
   function baseApiUrl() {
     return process.env.NEXT_PUBLIC_BASE_API_URL;
   }
@@ -195,27 +200,13 @@ const startSessionTransition = () => {
     });
   }
 
-// Function to handle the session timeout end
-const handleTimeoutEndSession = () => {
-  showCloseSessionGif(); // Show the GIF transition
+  const handleTimeoutEndSession = () => {
+    showCloseSessionGif();  // Show GIF transition before ending the session
   
-  setTimeout(() => {
-    completeEndSession(); // End the session after GIF transition
-
-    // **Force Restart of Background Video**
     setTimeout(() => {
-      const backgroundVideo = document.querySelector("#main-video1") as HTMLVideoElement;
-      if (backgroundVideo) {
-        backgroundVideo.pause();  // Pause in case it's playing
-        backgroundVideo.currentTime = 0; // Restart from beginning
-        backgroundVideo.load(); // Force reload
-        backgroundVideo.play(); // Ensure it starts playing again
-      }
-    }, 0); // Restart background video after transition
-
-  }, 2000); // Delay end session after GIF animation
-};
-
+      endSession();  // Proceed with ending session after GIF transition
+    }, 4000);  // Wait 4 seconds after GIF before ending session
+  };
 
 useEffect(() => {
   // Function to handle the session end when the page is about to unload (e.g., reload or navigate away)
@@ -237,74 +228,99 @@ useEffect(() => {
 // Automatically trigger session end when timeout occurs
 useEffect(() => {
   if (sessionTimeout) {
-    // Only trigger timeout actions when it's actually reached.
     const timeoutHandler = setTimeout(() => {
-      handleTimeoutEndSession(); // Trigger end session when timeout reaches 1 hour
-    }, 30000); 
+      handleTimeoutEndSession();  // Trigger end session when timeout is reached
+    }, 30000);  // Adjust timeout duration if necessary
 
-    return () => clearTimeout(timeoutHandler); // Cleanup timeout if the component is unmounted or session is reset
+    return () => clearTimeout(timeoutHandler);  // Cleanup timeout
   }
-}, [sessionTimeout]); // Only trigger when the timeout is updated
+}, [sessionTimeout]);
 
 
 // Add logic to hide the avatar and .main-one div when the session ends
 const endSession = async () => {
   if (!avatar.current) return;
 
-  // Stop any ongoing streams or interactions
-  await avatar.current.stopAvatar(); // Ensure avatar stops the session
+  await avatar.current.stopAvatar();
 
-  // Clear timeouts to prevent session from being reset unintentionally
   if (sessionTimeout) {
     clearTimeout(sessionTimeout);
   }
 
-  // Hide elements and perform necessary cleanup
   setButtonsVisible(false);
   setStream(undefined);
   setMaskVisible(false);
-  
-  // Reset videos and other session-related UI elements
-  setTimeout(() => {
-    const avatarVideo = document.querySelector(".avatar-stream") as HTMLVideoElement;
-    const backgroundVideo = document.querySelector("#main-video1") as HTMLVideoElement;
 
-    if (avatarVideo) avatarVideo.style.opacity = "0";
-    if (backgroundVideo) backgroundVideo.style.opacity = "0";
-  }, 1000);
+  // Reset videos immediately
+  const avatarVideo = document.querySelector(".avatar-stream") as HTMLVideoElement;
+  const backgroundVideo = document.querySelector("#main-video1") as HTMLVideoElement;
+  const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
 
-  // You can also restart the screensaver or video here if needed.
+  // Hide avatar and background videos immediately
+  if (avatarVideo) avatarVideo.style.opacity = "0";
+  if (backgroundVideo) backgroundVideo.style.opacity = "0";
+
+  // Reset screensaver video instantly
+  if (screensaverVideo) {
+    screensaverVideo.pause();
+    screensaverVideo.currentTime = 0;
+    screensaverVideo.load();
+    screensaverVideo.play();
+  }
 };
-    // Function to show GIF on session end (both button click and timeout)
-    const showCloseSessionGif = () => {
-      // Create the GIF image for transition
-      const gifImage = document.createElement("img");
-      gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif"; // Your GIF source
-      gifImage.style.position = "absolute";
-      gifImage.style.left = "0";
-      gifImage.style.width = "100%";
-      gifImage.style.height = "100%";
-      gifImage.style.top = "0";
-      gifImage.style.opacity = "1"; // Ensure it is visible immediately
-      gifImage.style.zIndex = "1000"; // On top of everything else
+
+
     
-      // Get the main container where everything will be added
-      const mainUpDiv = document.querySelector(".main-up");
-    
-      // Append the GIF to the main-up container
-      if (mainUpDiv) {
-        mainUpDiv.appendChild(gifImage);
-      }
-    
-      // Remove GIF after 4 seconds and trigger session end
-      setTimeout(() => {
-        if (gifImage.parentElement) {
-          gifImage.parentElement.removeChild(gifImage); // Remove GIF after it plays once
-        }
-        // Proceed with ending the session
-        completeEndSession();
-      }, 4000); // Wait for the GIF to finish playing before completing the session
-    };
+const showCloseSessionGif = () => {
+  // Create the GIF image
+  const gifImage = document.createElement("img");
+  gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif";
+  gifImage.style.position = "absolute";
+  gifImage.style.left = "0";
+  gifImage.style.width = "100%";
+  gifImage.style.height = "100%";
+  gifImage.style.top = "0";
+  gifImage.style.opacity = "1";
+  gifImage.style.zIndex = "1000";
+
+  // Append GIF to .main-up
+  const mainUpDiv = document.querySelector(".main-up");
+  if (mainUpDiv) {
+    mainUpDiv.appendChild(gifImage);
+  }
+
+// Select the .main-one div and cast it to HTMLElement
+const mainOneDiv = document.querySelector(".main-one") as HTMLElement | null;
+
+if (mainOneDiv) {
+  // Delay hiding the .main-one div by 2 seconds
+  setTimeout(() => {
+    mainOneDiv.style.opacity = "0"; // Hide .main-one after 2 seconds
+  }, 2000);
+}
+
+  // After the GIF finishes, hide the GIF and show .main-up
+  setTimeout(() => {
+    if (gifImage.parentElement) {
+      gifImage.parentElement.removeChild(gifImage);  // Remove the GIF
+    }
+
+// Select the .main-up element and cast it to HTMLElement
+const mainUpDiv = document.querySelector(".main-up") as HTMLElement | null;
+
+// Delay showing .main-up by 2 seconds
+setTimeout(() => {
+  if (mainUpDiv) {
+    mainUpDiv.style.transition = "opacity 1s ease-out"; // Smooth transition for the .main-up div
+    mainUpDiv.style.opacity = "1"; // Show .main-up
+  }
+}, 0); // 2000 milliseconds = 2 seconds
+
+
+}, 4000); // Wait for the GIF to finish (4 seconds) before starting the 2-second delay
+};
+
+
     useEffect(() => {
       // Ensure screensaver video restarts on component mount
       const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
@@ -318,10 +334,9 @@ const endSession = async () => {
     
     
 // Function to complete session end after GIF
-async function completeEndSession() {
-  if (!avatar.current) return;
+const completeEndSession = async () => {
+  setIsEndingSession(true);  // Set session ending state to true
 
-  // Start the fade-out effect on avatar and background videos
   const avatarVideo = document.querySelector(".avatar-stream") as HTMLVideoElement;
   const backgroundVideo = document.querySelector("#main-video1") as HTMLVideoElement;
   const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
@@ -339,16 +354,12 @@ async function completeEndSession() {
   }
 
   setTimeout(async () => {
-    await avatar.current?.stopAvatar();
-    setStream(undefined);
-    setMaskVisible(false);
+    // Complete session logic
+    // You can stop the avatar and clean up other session-related states here
+    setButtonsVisible(false);  // Hide buttons after session ends
+  }, 1000);  // Wait for fade-out to complete before hiding the buttons
+};
 
-    setTimeout(() => {
-      setButtonsVisible(true);
-    }, 1000);
-
-  }, 1000);
-}
  
 
   const handleChangeChatMode = useMemoizedFn(async (v) => {
@@ -497,7 +508,7 @@ async function completeEndSession() {
                   <Button
                     className="bg-main"
                     size="lg"
-                    onClick={endSession}
+                    onClick={handleTimeoutEndSession}
                     style={{
                       backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Endbutton.png")',
                       backgroundSize: 'cover',  // Ensure the image covers the entire button
