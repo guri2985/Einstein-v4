@@ -280,6 +280,7 @@ const endSession = async () => {
 
   // Restart screensaver
   if (screensaverVideo) {
+    screensaverVideo.style.display = "block";
     screensaverVideo.pause();
     screensaverVideo.currentTime = 0;
     screensaverVideo.load();
