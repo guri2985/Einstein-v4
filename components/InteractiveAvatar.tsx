@@ -207,10 +207,14 @@ const startSessionTransition = () => {
 
   const handleTimeoutEndSession = () => {
     if (hasEndedRef.current) return; // prevent double-trigger
+  
+    setButtonsVisible(false); // 🔥 Instantly hide the end session button
+  
     showCloseSessionGif();
+  
     setTimeout(() => {
       endSession();
-    }, 4000);
+    }, 2000);
   };
 
 useEffect(() => {
@@ -244,22 +248,23 @@ useEffect(() => {
 
 // Add logic to hide the avatar and .main-one div when the session ends
 const endSession = async () => {
-  // Ensure session hasn't already ended
   if (hasEndedRef.current || !avatar.current) return;
-  
+
   hasEndedRef.current = true;
   console.log("Ending session...");
 
   try {
-    // Stop avatar and voice chat
+    // 🛑 Immediately interrupt any ongoing speech
+    await avatar.current.interrupt();
+
+    // 🧹 Then stop everything else
     await avatar.current.closeVoiceChat?.();
     await avatar.current.stopAvatar();
-    avatar.current = null; // Clean up avatar instance
+    avatar.current = null;
   } catch (error) {
     console.warn("Error while stopping avatar:", error);
   }
 
-  // Clear timeout if any
   if (sessionTimeout) {
     clearTimeout(sessionTimeout);
     setSessionTimeout(null);
@@ -270,7 +275,7 @@ const endSession = async () => {
   setStream(undefined);
   setMaskVisible(false);
 
-  // Hide avatar and background video
+  // Fade out UI
   const avatarVideo = document.querySelector(".avatar-stream") as HTMLVideoElement;
   const backgroundVideo = document.querySelector("#main-video1") as HTMLVideoElement;
   const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
@@ -278,7 +283,6 @@ const endSession = async () => {
   if (avatarVideo) avatarVideo.style.opacity = "0";
   if (backgroundVideo) backgroundVideo.style.opacity = "0";
 
-  // Restart screensaver
   if (screensaverVideo) {
     screensaverVideo.style.display = "block";
     screensaverVideo.pause();
@@ -369,7 +373,7 @@ const showStartSessionGif = (): Promise<void> => {
         gifImage.parentElement.removeChild(gifImage);
       }
       resolve();
-    }, 4000); // Delay before resolving (GIF duration)
+    }, 3000); // Delay before resolving (GIF duration)
   });
 };
 
