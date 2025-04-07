@@ -121,27 +121,30 @@ export default function InteractiveAvatar() {
       setData(res);
   
       await avatar.current.startVoiceChat({ useSilencePrompt: true });
-  
-      await avatar.current.speak({
-        text: "Hello, I am your interactive avatar. Let's begin!",
-      });
-  
-      setChatMode("voice_mode");
-  
-      setSessionTimeout(
-        setTimeout(() => {
-          showCloseSessionGif();
-        }, 30000)
-      );
-    } catch (error) {
-      console.error("Error starting avatar session:", error);
-    } finally {
-      setIsLoadingSession(false);
-    }
-  
-    // Final UI transition after everything’s in place
-    startSessionTransition();
-  };
+
+    // Add delay before speaking (5 seconds)
+    await new Promise((resolve) => setTimeout(resolve, 5000)); // 5000 milliseconds (5 seconds) delay
+
+    await avatar.current.speak({
+      text: "Hello, I am your interactive avatar. Let's begin!",
+    });
+
+    setChatMode("voice_mode");
+
+    setSessionTimeout(
+      setTimeout(() => {
+        showCloseSessionGif();
+      }, 30000)
+    );
+  } catch (error) {
+    console.error("Error starting avatar session:", error);
+  } finally {
+    setIsLoadingSession(false);
+  }
+
+  // Final UI transition after everything’s in place
+  startSessionTransition();
+};
   
 
   let isGifLoaded = false; 
@@ -214,7 +217,7 @@ const startSessionTransition = () => {
   
     setTimeout(() => {
       endSession();
-    }, 2000);
+    }, 1000);
   };
 
 useEffect(() => {
