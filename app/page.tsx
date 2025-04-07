@@ -12,19 +12,17 @@ export default function App() {
 
   return (
     <div
-      className="main-wrapper"
+      className="main-div"
       style={{
         position: "relative",
         width: "1080px",
         height: "1920px",
         overflow: "hidden",
+        margin: "auto",
        
       }}
     >
-      {/* Background Video */}
-     
-
-      {/* Avatar + Controls */}
+  
       <InteractiveAvatar />
     </div>
   );

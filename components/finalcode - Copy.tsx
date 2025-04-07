@@ -77,11 +77,11 @@ export default function InteractiveAvatar() {
     setSessionEnded(false);
     hasEndedRef.current = false;
   
-    // ✅ Show loader immediately
-    setIsLoadingSession(true);
-  
-    // 🔄 Then play transition GIF
+    // 1. Show transition GIF first
     await showStartSessionGif();
+  
+    // 2. After GIF completes, show loading screen
+    setIsLoadingSession(true);
   
     const newToken = await fetchAccessToken();
   
@@ -128,11 +128,9 @@ export default function InteractiveAvatar() {
   
       setChatMode("voice_mode");
   
-      setSessionTimeout(
-        setTimeout(() => {
-          showCloseSessionGif();
-        }, 30000)
-      );
+      setSessionTimeout(setTimeout(() => {
+        showCloseSessionGif();
+      }, 30000));
     } catch (error) {
       console.error("Error starting avatar session:", error);
     } finally {
@@ -341,12 +339,6 @@ setTimeout(() => {
 
 const showStartSessionGif = (): Promise<void> => {
   return new Promise((resolve) => {
-    // Hide the .screensaver-video instantly
-    const screensaverVideo = document.querySelector(".screensaver-video") as HTMLElement;  // Type assertion
-    if (screensaverVideo) {
-      screensaverVideo.style.display = "none";
-    }
-
     const gifImage = document.createElement("img");
     gifImage.src = "https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/pixels_once.gif";
     gifImage.style.position = "absolute";
@@ -356,9 +348,8 @@ const showStartSessionGif = (): Promise<void> => {
     gifImage.style.top = "0";
     gifImage.style.opacity = "1";
     gifImage.style.zIndex = "9999";
-    gifImage.style.backgroundColor = "transparent";  // Add a white background to the GIF
 
-    const mainUpDiv = document.querySelector(".main-up") as HTMLElement;  // Type assertion
+    const mainUpDiv = document.querySelector(".main-up");
     if (mainUpDiv) {
       mainUpDiv.appendChild(gifImage);
     }
@@ -368,7 +359,7 @@ const showStartSessionGif = (): Promise<void> => {
         gifImage.parentElement.removeChild(gifImage);
       }
       resolve();
-    }, 4000); // Delay before resolving (GIF duration)
+    }, 2000); // Delay before resolving (GIF duration)
   });
 };
 
@@ -458,55 +449,48 @@ const completeEndSession = async () => {
     <div className="main-wrapper" style={{ position: "relative" }}>
       
       {/* Default screensaver video */}
-      <div className="main-up" style={{ height: "100%",  position: "absolute",
-            top: "0",
-            left: "0",
-            width: "100%", }}>
-        <video
-          className="screensaver-video"
-          src="https://ounocreatstg.wpenginepowered.com/videos/screensaver.mp4"
-          autoPlay
-          loop
-          muted
-          style={{
-           
-            height: "100%",
-            objectFit: "cover",
-            opacity: "1",
-            transition: "opacity 1s ease-in-out",
-          }}
-        />
-        
-        {/* Append loader inside .main-up */}
-        {isLoadingSession && (
-          <LoadingScreen
-            onComplete={() => setIsLoadingSession(false)}
-            isLoadingSession={isLoadingSession}
-          />
-        )}
+      <div className="main-up" style={{ height: "100%" }}>
+      <video
+  className="screensaver-video"
+  src="https://ounocreatstg.wpenginepowered.com/videos/screensaver.mp4"
+  autoPlay
+  loop
+  muted
+  style={{
+    position: "absolute",
+    top: "0",
+    left: "0",
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    opacity: "1",
+    transition: "opacity 1s ease-in-out",
+  }}
+/>
       </div>
-  
+
       {/* Avatar video and new background */}
       <div className="main-one" style={{ opacity: "0", transition: "opacity 0s ease-in-out" }}>
-        <video
-          id="main-video1"
-          src="https://ounocreatstg.wpenginepowered.com/videos/main-video.mp4"
-          autoPlay
-          loop
-          muted
-          style={{
-            position: "absolute",
-            top: "0",
-            left: "0",
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            opacity: "0", // Initially hidden
-            zIndex: "10",
-            maskImage: 'radial-gradient(circle at 50% 12%, transparent 130px, rgb(255, 255, 255) 180px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 50% 12%, transparent 130px, rgb(255, 255, 255) 180px)', 
-          }}
-        />
+      <video
+  id="main-video1"
+  src="https://ounocreatstg.wpenginepowered.com/videos/main-video.mp4"
+  autoPlay
+  loop
+  muted
+  style={{
+    position: "absolute",
+    top: "0",
+    left: "0",
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    opacity: "0", // Initially hidden
+    zIndex: "10",
+    maskImage: 'radial-gradient(circle at 50% 12%, transparent 130px, rgb(255, 255, 255) 180px)', 
+    WebkitMaskImage: 'radial-gradient(circle at 50% 12%, transparent 130px, rgb(255, 255, 255) 180px)', 
+  }}
+/>
+
         <video
           ref={mediaStream}
           autoPlay
@@ -514,77 +498,81 @@ const completeEndSession = async () => {
           className="avatar-stream"
           style={{
             objectFit: "contain",
-            position: "absolute",
-            top: "330px",
-            left: "50.7%",
-            transform: "translate(-50%, -50%)",  // Centers the avatar on the screen
-            width: "1010px",
+              position: "absolute",
+              top: "330px",
+              left: "50.7%",
+              transform: "translate(-50%, -50%)",  // Centers the avatar on the screen
+              width:"1010px",
           }}
         />
       </div>
-  
-      {/* Session Start Button */}
+
+      {/* Start session button */}
       <Card>
         <CardBody>
           {!stream && !isLoadingSession ? (
-            <motion.div
-              initial={{ scale: 1, opacity: 1 }}  // Start at normal size
-              animate={{ scale: [1, 1.03, 1], opacity: 1 }} 
-              transition={{
-                duration: 1,
-                ease: "easeInOut",
-                repeat: Infinity,
-                repeatType: "reverse",
-              }}
-            >
-              <Button 
-                className="w-full text-white bg-main"
-                size="lg"
-                onClick={startSession}
-                style={{
-                  backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Startbutton.png")',
-                  backgroundSize: 'cover',  // Ensure the image covers the entire button
-                  backgroundPosition: 'center',  // Center the image in the button
-                  backgroundRepeat: 'no-repeat',  // Ensure the image doesn't repeat
-                  backgroundColor: 'transparent',
-                  width: '260px',
-                  height: '100px',
-                }}
-              />  
-            </motion.div>
+          
+<motion.div
+  initial={{ scale: 1, opacity: 1 }}  // Start at normal size
+  animate={{ scale: [1, 1.03, 1], opacity: 1 }} 
+  transition={{
+    duration: 1,
+    ease: "easeInOut",
+    repeat: Infinity,
+    repeatType: "reverse",
+  }}
+><Button 
+          className=" w-full text-white bg-main"
+          size="lg"
+          onClick={startSession}
+          style={{
+            backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Startbutton.png")',
+            backgroundSize: 'cover',  // Ensure the image covers the entire button
+            backgroundPosition: 'center',  // Center the image in the button
+            backgroundRepeat: 'no-repeat',  // Ensure the image doesn't repeat
+            backgroundColor:'transparent',
+            width:'260px',
+            height:'100px',
+          }}
+        >  
+           
+            </Button> </motion.div>
           ) : isLoadingSession ? (
-            <LoadingScreen onComplete={() => setIsLoadingSession(false)} isLoadingSession={isLoadingSession} />
+           
+           <LoadingScreen onComplete={() => setIsLoadingSession(false)} isLoadingSession={isLoadingSession} />
           ) : (
             <>
               {buttonsVisible && (
                 <>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
+                   <motion.div
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ duration: 0.3, ease: "easeOut" }}
+  >
+                  <Button
+                    className="bg-main"
+                    size="lg"
+                    onClick={handleTimeoutEndSession}
+                    style={{
+                      backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Endbutton.png")',
+                      backgroundSize: 'cover',  // Ensure the image covers the entire button
+                      backgroundPosition: 'center',  // Center the image in the button
+                      backgroundRepeat: 'no-repeat',  // Ensure the image doesn't repeat
+                      backgroundColor:'transparent',
+                      width:'260px',
+                      height:'100px',
+                    }}
                   >
-                    <Button
-                      className="bg-main"
-                      size="lg"
-                      onClick={handleTimeoutEndSession}
-                      style={{
-                        backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Endbutton.png")',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundColor: 'transparent',
-                        width: '260px',
-                        height: '100px',
-                      }}
-                    />
-                  </motion.div>
+                  
+                  </Button> </motion.div>
                 </>
               )}
             </>
           )}
         </CardBody>
       </Card>
+
+      
     </div>
   );
-  
 }
