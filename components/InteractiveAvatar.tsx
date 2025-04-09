@@ -23,12 +23,7 @@ import { useMemoizedFn, usePrevious } from "ahooks";
 import LoadingScreen from "./LoadingScreen"; // Import the LoadingScreen component
 import InteractiveAvatarTextInput from "./InteractiveAvatarTextInput";
 import { AVATARS, STT_LANGUAGE_LIST } from "@/app/lib/constants";
-
-
-
 export default function InteractiveAvatar() {
-
- 
   const [isLoadingSession, setIsLoadingSession] = useState(false);
   const [isLoadingRepeat, setIsLoadingRepeat] = useState(false);
   const [stream, setStream] = useState<MediaStream>();
@@ -77,13 +72,12 @@ export default function InteractiveAvatar() {
     setSessionEnded(false);
     hasEndedRef.current = false;
   
-    // ✅ Show loader immediately
-    setIsLoadingSession(true);
-  
-    // 🔄 Then play transition GIF
-    await showStartSessionGif();
+    // 🔄 Start GIF and loader logic
+    await showStartSessionGif(() => setIsLoadingSession(true));
   
     const newToken = await fetchAccessToken();
+  
+    setIsLoadingSession(true); // 🔄 Optional: in case loader is unmounted too early
   
     avatar.current = new StreamingAvatar({
       token: newToken,
@@ -121,30 +115,31 @@ export default function InteractiveAvatar() {
       setData(res);
   
       await avatar.current.startVoiceChat({ useSilencePrompt: true });
-
-    // Add delay before speaking (5 seconds)
-    await new Promise((resolve) => setTimeout(resolve, 5000)); // 5000 milliseconds (5 seconds) delay
-
-    await avatar.current.speak({
-      text: "Hello, I am your interactive avatar. Let's begin!",
-    });
-
-    setChatMode("voice_mode");
-
-    setSessionTimeout(
-      setTimeout(() => {
-        showCloseSessionGif();
-      }, 30000)
-    );
-  } catch (error) {
-    console.error("Error starting avatar session:", error);
-  } finally {
-    setIsLoadingSession(false);
-  }
-
-  // Final UI transition after everything’s in place
-  startSessionTransition();
-};
+  
+      // Delay before speaking (5 seconds)
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+  
+      await avatar.current.speak({
+        text: "Hello, I am your interactive avatar. Let's begin!",
+      });
+  
+      setChatMode("voice_mode");
+  
+      setSessionTimeout(
+        setTimeout(() => {
+          showCloseSessionGif();
+        }, 60000)
+      );
+    } catch (error) {
+      console.error("Error starting avatar session:", error);
+    } finally {
+      setIsLoadingSession(false);
+    }
+  
+    // Final UI transition
+    startSessionTransition();
+  };
+  
   
 
   let isGifLoaded = false; 
@@ -242,7 +237,7 @@ useEffect(() => {
   if (sessionTimeout) {
     const timeoutHandler = setTimeout(() => {
       handleTimeoutEndSession();  // Trigger end session when timeout is reached
-    }, 30000);  // Adjust timeout duration if necessary
+    }, 60000);  // Adjust timeout duration if necessary
 
     return () => clearTimeout(timeoutHandler);  // Cleanup timeout
   }
@@ -347,38 +342,54 @@ setTimeout(() => {
 },4000); // Wait for the GIF to finish (4 seconds) before starting the 2-second delay
 };
 
-const showStartSessionGif = (): Promise<void> => {
+const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
   return new Promise((resolve) => {
-    // Hide the .screensaver-video instantly
-    const screensaverVideo = document.querySelector(".screensaver-video") as HTMLElement;  // Type assertion
-    if (screensaverVideo) {
-      screensaverVideo.style.display = "none";
-    }
+    const screensaverVideo = document.querySelector(".screensaver-video") as HTMLElement;
 
     const gifImage = document.createElement("img");
-    gifImage.src = "https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/pixels_once.gif";
-    gifImage.style.position = "absolute";
-    gifImage.style.left = "0";
-    gifImage.style.width = "100%";
-    gifImage.style.height = "100%";
-    gifImage.style.top = "0";
-    gifImage.style.opacity = "1";
-    gifImage.style.zIndex = "9999";
-    gifImage.style.backgroundColor = "transparent";  // Add a white background to the GIF
+    gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif";
+    Object.assign(gifImage.style, {
+      position: "absolute",
+      left: "0",
+      top: "0",
+      width: "100%",
+      height: "100%",
+      opacity: "1",
+      zIndex: "9999",
+      backgroundColor: "transparent",
+    });
 
-    const mainUpDiv = document.querySelector(".main-up") as HTMLElement;  // Type assertion
+    const mainUpDiv = document.querySelector(".main-up") as HTMLElement;
     if (mainUpDiv) {
       mainUpDiv.appendChild(gifImage);
     }
 
     setTimeout(() => {
-      if (gifImage.parentElement) {
-        gifImage.parentElement.removeChild(gifImage);
+      if (screensaverVideo) {
+        screensaverVideo.style.display = "none";
+      }
+
+      // 🔄 Trigger loader screen after 2s
+      showLoaderCallback();
+    }, 2000);
+
+    gifImage.onload = () => {
+      setTimeout(() => {
+        gifImage.remove();
+        resolve();
+      }, 4000);
+    };
+
+    gifImage.onerror = () => {
+      gifImage.remove();
+      if (screensaverVideo) {
+        screensaverVideo.style.display = "none";
       }
       resolve();
-    }, 3000); // Delay before resolving (GIF duration)
+    };
   });
 };
+
 
 
 
