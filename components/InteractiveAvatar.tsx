@@ -215,22 +215,27 @@ const startSessionTransition = () => {
     }, 1000);
   };
 
-useEffect(() => {
-  // Function to handle the session end when the page is about to unload (e.g., reload or navigate away)
-  const handleBeforeUnload = () => {
-    endSession(); // Call the endSession function to close the session properly
+  const cleanUpSessionSync = () => {
+    try {
+      avatar.current?.interrupt(); // Just fire, don’t await
+      avatar.current?.closeVoiceChat?.();
+      avatar.current?.stopAvatar();
+    } catch (e) {
+      console.warn("Failed to clean session in beforeunload:", e);
+    }
   };
 
-  // Add the event listener for beforeunload
-  window.addEventListener("beforeunload", handleBeforeUnload);
-
-  // Cleanup the event listener and session when the component is unmounted or before reload
-  return () => {
-    window.removeEventListener("beforeunload", handleBeforeUnload);
-    endSession(); // Ensure session is ended properly on unmount
-  };
-}, []); // Empty dependency array ensures this effect runs only once (on component mount)
-
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      cleanUpSessionSync(); // Best-effort cleanup
+    };
+  
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+  
 
 // Automatically trigger session end when timeout occurs
 useEffect(() => {
@@ -315,10 +320,9 @@ const showCloseSessionGif = () => {
 const mainOneDiv = document.querySelector(".main-one") as HTMLElement | null;
 
 if (mainOneDiv) {
-  // Delay hiding the .main-one div by 2 seconds
   setTimeout(() => {
-    mainOneDiv.style.opacity = "0"; // Hide .main-one after 2 seconds
-  }, 2000);
+    mainOneDiv.style.opacity = "0"; 
+  }, 4000);
 }
 
   // After the GIF finishes, hide the GIF and show .main-up
@@ -330,7 +334,7 @@ if (mainOneDiv) {
 // Select the .main-up element and cast it to HTMLElement
 const mainUpDiv = document.querySelector(".main-up") as HTMLElement | null;
 
-// Delay showing .main-up by 2 seconds
+
 setTimeout(() => {
   if (mainUpDiv) {
     mainUpDiv.style.transition = "opacity 1s ease-out"; // Smooth transition for the .main-up div
