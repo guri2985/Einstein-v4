@@ -31,7 +31,7 @@ export default function LoadingScreen({ onComplete, isLoadingSession }: LoadingS
       initial={{ opacity: 1 }}
       animate={{ opacity: !isLoadingSession ? 0 : 1 }}
       transition={{ duration: 0.5 }}
-      className="fixed inset-0 flex items-center justify-center bg-[#eee] text-white text-4xl font-bold z-50 loader-div"
+      className="fixed inset-0 flex items-center justify-center bg-white text-white text-4xl font-bold z-50 loader-div"
       style={{
         width: '1080px',
         height: '1920px',

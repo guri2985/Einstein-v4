@@ -46,6 +46,7 @@ export default function InteractiveAvatar() {
   const [isChatEnded, setIsChatEnded] = useState(false);
   const [sessionEnded, setSessionEnded] = useState(false);
   const hasEndedRef = useRef(false);
+ 
 
   function baseApiUrl() {
     return process.env.NEXT_PUBLIC_BASE_API_URL;
@@ -128,7 +129,7 @@ export default function InteractiveAvatar() {
       setSessionTimeout(
         setTimeout(() => {
           showCloseSessionGif();
-        }, 60000)
+        }, 55000)
       );
     } catch (error) {
       console.error("Error starting avatar session:", error);
@@ -242,7 +243,7 @@ useEffect(() => {
   if (sessionTimeout) {
     const timeoutHandler = setTimeout(() => {
       handleTimeoutEndSession();  // Trigger end session when timeout is reached
-    }, 60000);  // Adjust timeout duration if necessary
+    }, 55000);  // Adjust timeout duration if necessary
 
     return () => clearTimeout(timeoutHandler);  // Cleanup timeout
   }
@@ -476,7 +477,6 @@ const completeEndSession = async () => {
   }, [mediaStream, stream]);
 
 
-  
   return (
     <div className="main-wrapper" style={{ position: "relative" }}>
       
@@ -487,7 +487,7 @@ const completeEndSession = async () => {
             width: "100%", }}>
         <video
           className="screensaver-video"
-          src="https://ounocreatstg.wpenginepowered.com/videos/screensaver.mp4"
+          src="https://ounocreatstg.wpenginepowered.com/videos/avatar-bg-final.mp4"
           autoPlay
           loop
           muted
@@ -547,6 +547,7 @@ const completeEndSession = async () => {
       </div>
   
       {/* Session Start Button */}
+
       <Card>
         <CardBody>
           {!stream && !isLoadingSession ? (
@@ -607,6 +608,8 @@ const completeEndSession = async () => {
           )}
         </CardBody>
       </Card>
+
+
     </div>
   );
   
