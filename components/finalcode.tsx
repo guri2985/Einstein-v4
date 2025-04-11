@@ -46,7 +46,7 @@ export default function InteractiveAvatar() {
   const [isChatEnded, setIsChatEnded] = useState(false);
   const [sessionEnded, setSessionEnded] = useState(false);
   const hasEndedRef = useRef(false);
-  const [isIntroGifPlaying, setIsIntroGifPlaying] = useState(true);
+ 
 
   function baseApiUrl() {
     return process.env.NEXT_PUBLIC_BASE_API_URL;
@@ -129,7 +129,7 @@ export default function InteractiveAvatar() {
       setSessionTimeout(
         setTimeout(() => {
           showCloseSessionGif();
-        }, 60000)
+        }, 55000)
       );
     } catch (error) {
       console.error("Error starting avatar session:", error);
@@ -243,7 +243,7 @@ useEffect(() => {
   if (sessionTimeout) {
     const timeoutHandler = setTimeout(() => {
       handleTimeoutEndSession();  // Trigger end session when timeout is reached
-    }, 60000);  // Adjust timeout duration if necessary
+    }, 55000);  // Adjust timeout duration if necessary
 
     return () => clearTimeout(timeoutHandler);  // Cleanup timeout
   }
@@ -476,93 +476,7 @@ const completeEndSession = async () => {
     }
   }, [mediaStream, stream]);
 
-  useEffect(() => {
-    const hasSessionStarted = sessionStorage.getItem("sessionStarted");
-  
-    // If session has NOT started, mark it and skip GIF
-    if (!hasSessionStarted) {
-      sessionStorage.setItem("sessionStarted", "true");
-      return;
-    }
-  
-    // If session started and this is a reload or revisit
-    const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
-    const gifImage = document.createElement("img");
-    const mainUpDiv = document.querySelector(".main-up") as HTMLElement;
-    const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
-    const avatarStream = document.querySelector(".avatar-stream") as HTMLElement;
-  
-    // Hide content initially
-    if (mainOneDiv) {
-      Object.assign(mainOneDiv.style, {
-        opacity: "0",
-        visibility: "hidden",
-        transition: "none",
-        WebkitMaskImage: "none",
-        maskImage: "none",
-        clipPath: "none",
-      });
-    }
-  
-    if (avatarStream) {
-      Object.assign(avatarStream.style, {
-        opacity: "0",
-        visibility: "hidden",
-        transition: "none",
-      });
-    }
-  
-    // Show GIF instantly
-    gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif";
-    Object.assign(gifImage.style, {
-      position: "absolute",
-      top: "0",
-      left: "0",
-      width: "100%",
-      height: "100%",
-      zIndex: "9999",
-      opacity: "1",
-      objectFit: "cover",
-      pointerEvents: "none",
-    });
-  
-    mainUpDiv?.appendChild(gifImage);
-  
-    screensaverVideo?.pause();
-    if (screensaverVideo) {
-      screensaverVideo.currentTime = 0;
-      screensaverVideo.load();
-    }
-  
-    const gifDuration = 3000;
-    setTimeout(() => {
-      gifImage.remove();
-  
-      screensaverVideo?.play();
-  
-      if (mainOneDiv) {
-        Object.assign(mainOneDiv.style, {
-          visibility: "visible",
-          opacity: "1",
-          transition: "opacity 1s ease-in-out",
-          WebkitMaskImage: "",
-          maskImage: "",
-          clipPath: "",
-        });
-      }
-  
-      if (avatarStream) {
-        Object.assign(avatarStream.style, {
-          visibility: "visible",
-          opacity: "1",
-          transition: "opacity 1s ease-in-out",
-        });
-      }
-  
-      setIsIntroGifPlaying(false);
-    }, gifDuration);
-  }, []);
-  
+
   return (
     <div className="main-wrapper" style={{ position: "relative" }}>
       
@@ -633,7 +547,7 @@ const completeEndSession = async () => {
       </div>
   
       {/* Session Start Button */}
-      {!isIntroGifPlaying && (
+
       <Card>
         <CardBody>
           {!stream && !isLoadingSession ? (
@@ -694,7 +608,7 @@ const completeEndSession = async () => {
           )}
         </CardBody>
       </Card>
-)}
+
 
     </div>
   );
