@@ -45,6 +45,7 @@ export default function InteractiveAvatar() {
   const [sessionEnded, setSessionEnded] = useState(false);
   const hasEndedRef = useRef(false);
   const [countdownVisible, setCountdownVisible] = useState(false);
+  const countdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
 
   function baseApiUrl() {
@@ -67,10 +68,12 @@ export default function InteractiveAvatar() {
 
 
   const startSession = async () => {
-    if (sessionTimeout) clearTimeout(sessionTimeout);
-    setSessionTimeout(null);
+    if (countdownTimeoutRef.current) {
+      clearTimeout(countdownTimeoutRef.current);
+      countdownTimeoutRef.current = null;
+    }
+ 
     setSessionEnded(false);
-    setCountdownVisible(false);
     hasEndedRef.current = false;
   
     // 🔄 Start GIF and loader logic
@@ -124,6 +127,8 @@ export default function InteractiveAvatar() {
         text: "Hello, I am your interactive avatar. Let's begin!",
       });
   
+
+      
       setChatMode("voice_mode");
   
       // Set timeout for countdown visibility (10 seconds before end)
@@ -282,6 +287,10 @@ const endSession = async () => {
   setButtonsVisible(false);
   setStream(undefined);
   setMaskVisible(false);
+  if (countdownTimeoutRef.current) {
+    clearTimeout(countdownTimeoutRef.current);
+    countdownTimeoutRef.current = null;
+  }
   setCountdownVisible(false);
 
   // Fade out UI
