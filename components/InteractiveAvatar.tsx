@@ -72,7 +72,6 @@ export default function InteractiveAvatar() {
       clearTimeout(countdownTimeoutRef.current);
       countdownTimeoutRef.current = null;
     }
- 
     setSessionEnded(false);
     hasEndedRef.current = false;
   
@@ -127,14 +126,12 @@ export default function InteractiveAvatar() {
         text: "Hello, I am your interactive avatar. Let's begin!",
       });
   
-
+ // Set timeout for countdown visibility (10 seconds before end)
+ setTimeout(() => {
+  setCountdownVisible(true); // Show countdown GIF
+}, 41000); // Show countdown GIF 10 seconds before session ends
       
       setChatMode("voice_mode");
-  
-      // Set timeout for countdown visibility (10 seconds before end)
-    setTimeout(() => {
-      setCountdownVisible(true); // Show countdown GIF
-    }, 41000); // Show countdown GIF 10 seconds before session ends
 
     setSessionTimeout(
       setTimeout(() => {
