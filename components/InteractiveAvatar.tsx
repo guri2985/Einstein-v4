@@ -31,7 +31,6 @@ export default function InteractiveAvatar() {
   const [knowledgeId, setKnowledgeId] = useState<string>(""); 
   const [avatarId, setAvatarId] = useState<string>(""); 
   const [language, setLanguage] = useState<string>("en");
-
   const [data, setData] = useState<StartAvatarResponse>();
   const [text, setText] = useState<string>(""); 
   const mediaStream = useRef<HTMLVideoElement>(null);
@@ -39,7 +38,6 @@ export default function InteractiveAvatar() {
   const [chatMode, setChatMode] = useState("text_mode");
   const [isUserTalking, setIsUserTalking] = useState(false);
   const [maskVisible, setMaskVisible] = useState(false);
-
   const [buttonsVisible, setButtonsVisible] = useState(false);  // State to manage button visibility
   const [sessionTimeout, setSessionTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isEndingSession, setIsEndingSession] = useState(false);
@@ -47,6 +45,7 @@ export default function InteractiveAvatar() {
   const [sessionEnded, setSessionEnded] = useState(false);
   const hasEndedRef = useRef(false);
   const [countdownVisible, setCountdownVisible] = useState(false);
+  
 
   function baseApiUrl() {
     return process.env.NEXT_PUBLIC_BASE_API_URL;
@@ -71,6 +70,7 @@ export default function InteractiveAvatar() {
     if (sessionTimeout) clearTimeout(sessionTimeout);
     setSessionTimeout(null);
     setSessionEnded(false);
+    setCountdownVisible(false);
     hasEndedRef.current = false;
   
     // 🔄 Start GIF and loader logic
@@ -282,6 +282,7 @@ const endSession = async () => {
   setButtonsVisible(false);
   setStream(undefined);
   setMaskVisible(false);
+  setCountdownVisible(false);
 
   // Fade out UI
   const avatarVideo = document.querySelector(".avatar-stream") as HTMLVideoElement;
