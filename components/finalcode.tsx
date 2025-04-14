@@ -31,6 +31,7 @@ export default function InteractiveAvatar() {
   const [knowledgeId, setKnowledgeId] = useState<string>(""); 
   const [avatarId, setAvatarId] = useState<string>(""); 
   const [language, setLanguage] = useState<string>("en");
+
   const [data, setData] = useState<StartAvatarResponse>();
   const [text, setText] = useState<string>(""); 
   const mediaStream = useRef<HTMLVideoElement>(null);
@@ -38,13 +39,14 @@ export default function InteractiveAvatar() {
   const [chatMode, setChatMode] = useState("text_mode");
   const [isUserTalking, setIsUserTalking] = useState(false);
   const [maskVisible, setMaskVisible] = useState(false);
+
   const [buttonsVisible, setButtonsVisible] = useState(false);  // State to manage button visibility
   const [sessionTimeout, setSessionTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isEndingSession, setIsEndingSession] = useState(false);
   const [isChatEnded, setIsChatEnded] = useState(false);
   const [sessionEnded, setSessionEnded] = useState(false);
   const hasEndedRef = useRef(false);
-  const [countdownVisible, setCountdownVisible] = useState(false);
+ 
 
   function baseApiUrl() {
     return process.env.NEXT_PUBLIC_BASE_API_URL;
@@ -124,27 +126,24 @@ export default function InteractiveAvatar() {
   
       setChatMode("voice_mode");
   
-      // Set timeout for countdown visibility (10 seconds before end)
-    setTimeout(() => {
-      setCountdownVisible(true); // Show countdown GIF
-    }, 41000); // Show countdown GIF 10 seconds before session ends
-
-    setSessionTimeout(
-      setTimeout(() => {
-        showCloseSessionGif();
-      }, 53000)
-    );
-  } catch (error) {
-    console.error("Error starting avatar session:", error);
-  } finally {
-    setIsLoadingSession(false);
-  }
-
-  // Final UI transition
-  startSessionTransition();
-};
+      setSessionTimeout(
+        setTimeout(() => {
+          showCloseSessionGif();
+        }, 55000)
+      );
+    } catch (error) {
+      console.error("Error starting avatar session:", error);
+    } finally {
+      setIsLoadingSession(false);
+    }
   
-let isGifLoaded = false; 
+    // Final UI transition
+    startSessionTransition();
+  };
+  
+  
+
+  let isGifLoaded = false; 
 const startSessionTransition = () => {
   if (isGifLoaded) return;
 
@@ -206,9 +205,9 @@ const startSessionTransition = () => {
   }
 
   const handleTimeoutEndSession = () => {
-    if (hasEndedRef.current) return; 
+    if (hasEndedRef.current) return; // prevent double-trigger
   
-    setButtonsVisible(false); 
+    setButtonsVisible(false); // 🔥 Instantly hide the end session button
   
     showCloseSessionGif();
   
@@ -219,7 +218,7 @@ const startSessionTransition = () => {
 
   const cleanUpSessionSync = () => {
     try {
-      avatar.current?.interrupt(); 
+      avatar.current?.interrupt(); // Just fire, don’t await
       avatar.current?.closeVoiceChat?.();
       avatar.current?.stopAvatar();
     } catch (e) {
@@ -229,7 +228,7 @@ const startSessionTransition = () => {
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      cleanUpSessionSync(); 
+      cleanUpSessionSync(); // Best-effort cleanup
     };
   
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -243,10 +242,10 @@ const startSessionTransition = () => {
 useEffect(() => {
   if (sessionTimeout) {
     const timeoutHandler = setTimeout(() => {
-      handleTimeoutEndSession();  
-    }, 53000);  
+      handleTimeoutEndSession();  // Trigger end session when timeout is reached
+    }, 55000);  // Adjust timeout duration if necessary
 
-    return () => clearTimeout(timeoutHandler);  
+    return () => clearTimeout(timeoutHandler);  // Cleanup timeout
   }
 }, [sessionTimeout]);
 
@@ -259,7 +258,10 @@ const endSession = async () => {
   console.log("Ending session...");
 
   try {
+    // 🛑 Immediately interrupt any ongoing speech
     await avatar.current.interrupt();
+
+    // 🧹 Then stop everything else
     await avatar.current.closeVoiceChat?.();
     await avatar.current.stopAvatar();
     avatar.current = null;
@@ -324,23 +326,25 @@ if (mainOneDiv) {
   }, 4000);
 }
 
+  // After the GIF finishes, hide the GIF and show .main-up
   setTimeout(() => {
     if (gifImage.parentElement) {
-      gifImage.parentElement.removeChild(gifImage);  
+      gifImage.parentElement.removeChild(gifImage);  // Remove the GIF
     }
 
+// Select the .main-up element and cast it to HTMLElement
 const mainUpDiv = document.querySelector(".main-up") as HTMLElement | null;
 
 
 setTimeout(() => {
   if (mainUpDiv) {
-    mainUpDiv.style.transition = "opacity 1s ease-out"; 
-    mainUpDiv.style.opacity = "1"; 
+    mainUpDiv.style.transition = "opacity 1s ease-out"; // Smooth transition for the .main-up div
+    mainUpDiv.style.opacity = "1"; // Show .main-up
   }
-}, 0); 
+}, 0); // 2000 milliseconds = 2 seconds
 
 
-},4000); 
+},4000); // Wait for the GIF to finish (4 seconds) before starting the 2-second delay
 };
 
 const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
@@ -370,6 +374,7 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
         screensaverVideo.style.display = "none";
       }
 
+      // 🔄 Trigger loader screen after 2s
       showLoaderCallback();
     }, 2000);
 
@@ -389,15 +394,23 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
     };
   });
 };
- useEffect(() => {
+
+
+
+
+    useEffect(() => {
+      // Ensure screensaver video restarts on component mount
       const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
       if (screensaverVideo) {
         screensaverVideo.pause();  
         screensaverVideo.currentTime = 0; 
-        screensaverVideo.load(); 
+        screensaverVideo.load(); // Force reload
         screensaverVideo.play();
       }
-    }, []);   
+    }, []);
+    
+    
+// Function to complete session end after GIF
 const completeEndSession = async () => {
   setIsEndingSession(true);  // Set session ending state to true
 
@@ -408,20 +421,25 @@ const completeEndSession = async () => {
   if (avatarVideo && backgroundVideo) {
     avatarVideo.style.transition = "opacity 1s ease-out";
     backgroundVideo.style.transition = "opacity 1s ease-out";
-    avatarVideo.style.opacity = "0";  
-    backgroundVideo.style.opacity = "0"; 
+    avatarVideo.style.opacity = "0";  // Hide the avatar video
+    backgroundVideo.style.opacity = "0";  // Hide background video
   }
 
   if (mainOneDiv) {
     mainOneDiv.style.transition = "opacity 1s ease-out";
-    mainOneDiv.style.opacity = "0";  
+    mainOneDiv.style.opacity = "0";  // Hide the main div
   }
 
-setTimeout(async () => {
- setButtonsVisible(false);  
-  }, 1000); 
+  setTimeout(async () => {
+    // Complete session logic
+    // You can stop the avatar and clean up other session-related states here
+    setButtonsVisible(false);  // Hide buttons after session ends
+  }, 1000);  // Wait for fade-out to complete before hiding the buttons
 };
- const handleChangeChatMode = useMemoizedFn(async (v) => {
+
+ 
+
+  const handleChangeChatMode = useMemoizedFn(async (v) => {
     if (v === chatMode) {
       return;
     }
@@ -458,9 +476,7 @@ setTimeout(async () => {
     }
   }, [mediaStream, stream]);
 
-  useEffect(() => {
-    endSession(); 
-  }, []);
+
   return (
     <div className="main-wrapper" style={{ position: "relative" }}>
       
@@ -471,7 +487,7 @@ setTimeout(async () => {
             width: "100%", }}>
         <video
           className="screensaver-video"
-          src="https://ounocreatstg.wpenginepowered.com/videos/william-screensaver.mp4"
+          src="https://ounocreatstg.wpenginepowered.com/videos/avatar-bg-final.mp4"
           autoPlay
           loop
           muted
@@ -495,7 +511,6 @@ setTimeout(async () => {
   
       {/* Avatar video and new background */}
       <div className="main-one" style={{ opacity: "0", transition: "opacity 0s ease-in-out" }}>
-
         <video
           id="main-video1"
           src="https://ounocreatstg.wpenginepowered.com/videos/main-video.mp4"
@@ -552,9 +567,9 @@ setTimeout(async () => {
                 onClick={startSession}
                 style={{
                   backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Startbutton.png")',
-                  backgroundSize: 'cover',  
-                  backgroundPosition: 'center',  
-                  backgroundRepeat: 'no-repeat', 
+                  backgroundSize: 'cover',  // Ensure the image covers the entire button
+                  backgroundPosition: 'center',  // Center the image in the button
+                  backgroundRepeat: 'no-repeat',  // Ensure the image doesn't repeat
                   backgroundColor: 'transparent',
                   width: '260px',
                   height: '100px',
@@ -586,19 +601,6 @@ setTimeout(async () => {
                         height: '100px',
                       }}
                     />
-                   {countdownVisible && (
-                     <img className="counter"
-                      src="https://ounocreatstg.wpenginepowered.com/videos/counter.gif"
-                      alt="Countdown Timer"
-                      style={{
-                        position: "absolute",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        zIndex: "9999",
-                        maxWidth: "65%", // Adjust the size
-                      }}
-                      />
-                  )}
                   </motion.div>
                 </>
               )}
@@ -606,6 +608,9 @@ setTimeout(async () => {
           )}
         </CardBody>
       </Card>
+
+
     </div>
-  ); 
+  );
+  
 }

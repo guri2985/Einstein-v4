@@ -45,7 +45,7 @@ export default function InteractiveAvatar() {
   const [sessionEnded, setSessionEnded] = useState(false);
   const hasEndedRef = useRef(false);
   const [countdownVisible, setCountdownVisible] = useState(false);
-  const countdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+ 
   
 
   function baseApiUrl() {
@@ -68,10 +68,7 @@ export default function InteractiveAvatar() {
 
 
   const startSession = async () => {
-    if (countdownTimeoutRef.current) {
-      clearTimeout(countdownTimeoutRef.current);
-      countdownTimeoutRef.current = null;
-    }
+ 
     setSessionEnded(false);
     hasEndedRef.current = false;
   
@@ -126,18 +123,16 @@ export default function InteractiveAvatar() {
         text: "Hello, I am your interactive avatar. Let's begin!",
       });
   
- // Set timeout for countdown visibility (10 seconds before end)
- setTimeout(() => {
-  setCountdownVisible(true); // Show countdown GIF
-}, 41000); // Show countdown GIF 10 seconds before session ends
+// Start countdown GIF visibility exactly after 41 seconds from now
+const countdownTimeout = setTimeout(() => {
+  setCountdownVisible(true);
+}, 41000);
+setSessionTimeout(countdownTimeout); // Save so it can be cleared on end
+
       
       setChatMode("voice_mode");
 
-    setSessionTimeout(
-      setTimeout(() => {
-        showCloseSessionGif();
-      }, 53000)
-    );
+   
   } catch (error) {
     console.error("Error starting avatar session:", error);
   } finally {
@@ -284,10 +279,6 @@ const endSession = async () => {
   setButtonsVisible(false);
   setStream(undefined);
   setMaskVisible(false);
-  if (countdownTimeoutRef.current) {
-    clearTimeout(countdownTimeoutRef.current);
-    countdownTimeoutRef.current = null;
-  }
   setCountdownVisible(false);
 
   // Fade out UI
@@ -490,6 +481,7 @@ const completeEndSession = async () => {
   useEffect(() => {
     endSession(); // clean stale stuff from last reload
   }, []);
+
   return (
     <div className="main-wrapper" style={{ position: "relative" }}>
       
