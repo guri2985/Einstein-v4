@@ -39,12 +39,12 @@ export default function InteractiveAvatar() {
   const [isUserTalking, setIsUserTalking] = useState(false);
   const [maskVisible, setMaskVisible] = useState(false);
   const [buttonsVisible, setButtonsVisible] = useState(false);  // State to manage button visibility
-  const [sessionTimeout, setSessionTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isEndingSession, setIsEndingSession] = useState(false);
   const [isChatEnded, setIsChatEnded] = useState(false);
   const [sessionEnded, setSessionEnded] = useState(false);
   const hasEndedRef = useRef(false);
   const [countdownVisible, setCountdownVisible] = useState(false);
+  const [isAvatarTalking, setIsAvatarTalking] = useState(false);
  
   
 
@@ -68,7 +68,6 @@ export default function InteractiveAvatar() {
 
 
   const startSession = async () => {
- 
     setSessionEnded(false);
     hasEndedRef.current = false;
   
@@ -93,6 +92,8 @@ export default function InteractiveAvatar() {
       if (avatarVideo) avatarVideo.style.opacity = "1";
     });
   
+
+    
     try {
       const res = await avatar.current.createStartAvatar({
         quality: AvatarQuality.High,
@@ -109,25 +110,22 @@ export default function InteractiveAvatar() {
           },
         },
         language,
-        disableIdleTimeout: true,
+        disableIdleTimeout: false,
       });
   
       setData(res);
   
       await avatar.current.startVoiceChat({ useSilencePrompt: true });
   
+
+
       // Delay before speaking (5 seconds)
       await new Promise((resolve) => setTimeout(resolve, 5000));
-  
+      setIsAvatarTalking(true);
       await avatar.current.speak({
         text: "Hello, I am your interactive avatar. Let's begin!",
       });
-  
-// Start countdown GIF visibility exactly after 41 seconds from now
-const countdownTimeout = setTimeout(() => {
-  setCountdownVisible(true);
-}, 41000);
-setSessionTimeout(countdownTimeout); // Save so it can be cleared on end
+      setIsAvatarTalking(false);
 
       
       setChatMode("voice_mode");
@@ -187,12 +185,14 @@ const startSessionTransition = () => {
       setDebug("Avatar API not initialized");
       return;
     }
+    setIsAvatarTalking(true);
     await avatar.current
       .speak({ text: text, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC })
       .catch((e) => {
         setDebug(e.message);
       });
-    setIsLoadingRepeat(false);
+    setIsAvatarTalking(false);
+    
   }
 
   async function handleInterrupt() {
@@ -239,16 +239,7 @@ const startSessionTransition = () => {
   }, []);
   
 
-// Automatically trigger session end when timeout occurs
-useEffect(() => {
-  if (sessionTimeout) {
-    const timeoutHandler = setTimeout(() => {
-      handleTimeoutEndSession();  // Trigger end session when timeout is reached
-    }, 53000);  // Adjust timeout duration if necessary
 
-    return () => clearTimeout(timeoutHandler);  // Cleanup timeout
-  }
-}, [sessionTimeout]);
 
 
 // Add logic to hide the avatar and .main-one div when the session ends
@@ -257,12 +248,10 @@ const endSession = async () => {
 
   hasEndedRef.current = true;
   console.log("Ending session...");
-
+  showCloseSessionGif();
   try {
-    // 🛑 Immediately interrupt any ongoing speech
     await avatar.current.interrupt();
 
-    // 🧹 Then stop everything else
     await avatar.current.closeVoiceChat?.();
     await avatar.current.stopAvatar();
     avatar.current = null;
@@ -270,16 +259,15 @@ const endSession = async () => {
     console.warn("Error while stopping avatar:", error);
   }
 
-  if (sessionTimeout) {
-    clearTimeout(sessionTimeout);
-    setSessionTimeout(null);
-  }
 
-  setSessionEnded(true);
-  setButtonsVisible(false);
-  setStream(undefined);
-  setMaskVisible(false);
-  setCountdownVisible(false);
+  setTimeout(() => {
+    setSessionEnded(true);
+    setIsEndingSession(false);
+    setButtonsVisible(false);
+    setStream(undefined);
+    setMaskVisible(false);
+  }, 4000);
+
 
   // Fade out UI
   const avatarVideo = document.querySelector(".avatar-stream") as HTMLVideoElement;
@@ -298,55 +286,49 @@ const endSession = async () => {
   }
 };
 
-
-
-
 const showCloseSessionGif = () => {
-  // Create the GIF image
+  const mainUpDiv = document.querySelector(".main-up") as HTMLElement | null;
+  if (!mainUpDiv || mainUpDiv.style.display === "none" || mainUpDiv.style.opacity === "0") {
+    if (mainUpDiv) {
+      mainUpDiv.style.display = "block";
+      mainUpDiv.style.opacity = "1";
+    }
+    setTimeout(() => showCloseSessionGif(), 100);
+    return;
+  }
+
   const gifImage = document.createElement("img");
   gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif";
-  gifImage.style.position = "absolute";
-  gifImage.style.left = "0";
-  gifImage.style.width = "100%";
-  gifImage.style.height = "100%";
-  gifImage.style.top = "0";
-  gifImage.style.opacity = "1";
-  gifImage.style.zIndex = "1000";
+  Object.assign(gifImage.style, {
+    position: "absolute",
+    left: "0",
+    top: "0",
+    width: "100%",
+    height: "100%",
+    opacity: "1",
+    zIndex: "1000",
+    backgroundColor: "transparent",
+  });
 
-  // Append GIF to .main-up
-  const mainUpDiv = document.querySelector(".main-up");
-  if (mainUpDiv) {
-    mainUpDiv.appendChild(gifImage);
+  gifImage.onload = () => {
+    setTimeout(() => {
+      gifImage.remove();
+    }, 4000); // remove after it’s guaranteed to be shown
+  };
+
+  gifImage.onerror = () => {
+    console.error("Session end GIF failed to load.");
+    gifImage.remove(); // fail gracefully
+  };
+
+  mainUpDiv.appendChild(gifImage);
+
+  const mainOneDiv = document.querySelector(".main-one") as HTMLElement | null;
+  if (mainOneDiv) {
+    setTimeout(() => {
+      mainOneDiv.style.opacity = "0";
+    }, 4000);
   }
-
-// Select the .main-one div and cast it to HTMLElement
-const mainOneDiv = document.querySelector(".main-one") as HTMLElement | null;
-
-if (mainOneDiv) {
-  setTimeout(() => {
-    mainOneDiv.style.opacity = "0"; 
-  }, 4000);
-}
-
-  // After the GIF finishes, hide the GIF and show .main-up
-  setTimeout(() => {
-    if (gifImage.parentElement) {
-      gifImage.parentElement.removeChild(gifImage);  // Remove the GIF
-    }
-
-// Select the .main-up element and cast it to HTMLElement
-const mainUpDiv = document.querySelector(".main-up") as HTMLElement | null;
-
-
-setTimeout(() => {
-  if (mainUpDiv) {
-    mainUpDiv.style.transition = "opacity 1s ease-out"; // Smooth transition for the .main-up div
-    mainUpDiv.style.opacity = "1"; // Show .main-up
-  }
-}, 0); // 2000 milliseconds = 2 seconds
-
-
-},4000); // Wait for the GIF to finish (4 seconds) before starting the 2-second delay
 };
 
 const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
@@ -396,10 +378,6 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
     };
   });
 };
-
-
-
-
     useEffect(() => {
       // Ensure screensaver video restarts on component mount
       const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
@@ -439,7 +417,27 @@ const completeEndSession = async () => {
   }, 1000);  // Wait for fade-out to complete before hiding the buttons
 };
 
- 
+const IDLE_TIMEOUT = 2 * 60 * 1000; // 2 minutes
+const WARNING_BEFORE = 10 * 1000; // Show GIF 10 seconds before session ends
+
+const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+const resetIdleTimer = () => {
+  if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
+  if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
+
+  warningTimeoutRef.current = setTimeout(() => {
+    // 🔥 Show GIF when warning time is reached
+    setCountdownVisible(true); // Optional counter
+    showCloseSessionGif(); // Your existing GIF function
+  }, IDLE_TIMEOUT - WARNING_BEFORE);
+
+  idleTimeoutRef.current = setTimeout(() => {
+    // 🧼 Auto-end session
+    handleTimeoutEndSession();
+  }, IDLE_TIMEOUT);
+};
 
   const handleChangeChatMode = useMemoizedFn(async (v) => {
     if (v === chatMode) {
@@ -481,7 +479,14 @@ const completeEndSession = async () => {
   useEffect(() => {
     endSession(); // clean stale stuff from last reload
   }, []);
+  useEffect(() => {
+    return () => {
+      if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
+      if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
+    };
+  }, []);
 
+  
   return (
     <div className="main-wrapper" style={{ position: "relative" }}>
       
@@ -607,7 +612,7 @@ const completeEndSession = async () => {
                         height: '100px',
                       }}
                     />
-                   {countdownVisible && (
+                   {countdownVisible && !isUserTalking && !isAvatarTalking &&  (
   <img className="counter"
     src="https://ounocreatstg.wpenginepowered.com/videos/counter.gif"
     alt="Countdown Timer"

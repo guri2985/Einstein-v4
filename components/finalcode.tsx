@@ -31,7 +31,6 @@ export default function InteractiveAvatar() {
   const [knowledgeId, setKnowledgeId] = useState<string>(""); 
   const [avatarId, setAvatarId] = useState<string>(""); 
   const [language, setLanguage] = useState<string>("en");
-
   const [data, setData] = useState<StartAvatarResponse>();
   const [text, setText] = useState<string>(""); 
   const mediaStream = useRef<HTMLVideoElement>(null);
@@ -39,14 +38,15 @@ export default function InteractiveAvatar() {
   const [chatMode, setChatMode] = useState("text_mode");
   const [isUserTalking, setIsUserTalking] = useState(false);
   const [maskVisible, setMaskVisible] = useState(false);
-
   const [buttonsVisible, setButtonsVisible] = useState(false);  // State to manage button visibility
   const [sessionTimeout, setSessionTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isEndingSession, setIsEndingSession] = useState(false);
   const [isChatEnded, setIsChatEnded] = useState(false);
   const [sessionEnded, setSessionEnded] = useState(false);
   const hasEndedRef = useRef(false);
+  const [countdownVisible, setCountdownVisible] = useState(false);
  
+  
 
   function baseApiUrl() {
     return process.env.NEXT_PUBLIC_BASE_API_URL;
@@ -68,8 +68,7 @@ export default function InteractiveAvatar() {
 
 
   const startSession = async () => {
-    if (sessionTimeout) clearTimeout(sessionTimeout);
-    setSessionTimeout(null);
+ 
     setSessionEnded(false);
     hasEndedRef.current = false;
   
@@ -124,23 +123,25 @@ export default function InteractiveAvatar() {
         text: "Hello, I am your interactive avatar. Let's begin!",
       });
   
+// Start countdown GIF visibility exactly after 41 seconds from now
+const countdownTimeout = setTimeout(() => {
+  setCountdownVisible(true);
+}, 41000);
+setSessionTimeout(countdownTimeout); // Save so it can be cleared on end
+
+      
       setChatMode("voice_mode");
-  
-      setSessionTimeout(
-        setTimeout(() => {
-          showCloseSessionGif();
-        }, 55000)
-      );
-    } catch (error) {
-      console.error("Error starting avatar session:", error);
-    } finally {
-      setIsLoadingSession(false);
-    }
-  
-    // Final UI transition
-    startSessionTransition();
-  };
-  
+
+   
+  } catch (error) {
+    console.error("Error starting avatar session:", error);
+  } finally {
+    setIsLoadingSession(false);
+  }
+
+  // Final UI transition
+  startSessionTransition();
+};
   
 
   let isGifLoaded = false; 
@@ -243,7 +244,7 @@ useEffect(() => {
   if (sessionTimeout) {
     const timeoutHandler = setTimeout(() => {
       handleTimeoutEndSession();  // Trigger end session when timeout is reached
-    }, 55000);  // Adjust timeout duration if necessary
+    }, 53000);  // Adjust timeout duration if necessary
 
     return () => clearTimeout(timeoutHandler);  // Cleanup timeout
   }
@@ -278,6 +279,7 @@ const endSession = async () => {
   setButtonsVisible(false);
   setStream(undefined);
   setMaskVisible(false);
+  setCountdownVisible(false);
 
   // Fade out UI
   const avatarVideo = document.querySelector(".avatar-stream") as HTMLVideoElement;
@@ -476,6 +478,9 @@ const completeEndSession = async () => {
     }
   }, [mediaStream, stream]);
 
+  useEffect(() => {
+    endSession(); // clean stale stuff from last reload
+  }, []);
 
   return (
     <div className="main-wrapper" style={{ position: "relative" }}>
@@ -487,7 +492,7 @@ const completeEndSession = async () => {
             width: "100%", }}>
         <video
           className="screensaver-video"
-          src="https://ounocreatstg.wpenginepowered.com/videos/avatar-bg-final.mp4"
+          src="https://ounocreatstg.wpenginepowered.com/videos/william-screensaver.mp4"
           autoPlay
           loop
           muted
@@ -511,6 +516,7 @@ const completeEndSession = async () => {
   
       {/* Avatar video and new background */}
       <div className="main-one" style={{ opacity: "0", transition: "opacity 0s ease-in-out" }}>
+
         <video
           id="main-video1"
           src="https://ounocreatstg.wpenginepowered.com/videos/main-video.mp4"
@@ -601,6 +607,20 @@ const completeEndSession = async () => {
                         height: '100px',
                       }}
                     />
+                   {countdownVisible && (
+  <img className="counter"
+    src="https://ounocreatstg.wpenginepowered.com/videos/counter.gif"
+    alt="Countdown Timer"
+    style={{
+      position: "absolute",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      zIndex: "9999",
+      maxWidth: "65%", // Adjust the size
+    }}
+  />
+)}
+
                   </motion.div>
                 </>
               )}
