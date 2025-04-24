@@ -232,7 +232,7 @@ async function handleInterrupt() {
 const resetInactivityTimer = () => {
   console.log("🔥 Resetting inactivity timer");
 
-  // Clear previous timers
+  // Clear both timers
   if (inactivityTimeout) {
     clearTimeout(inactivityTimeout);
     inactivityTimeout = null;
@@ -243,20 +243,30 @@ const resetInactivityTimer = () => {
   }
 
   interruptionOccurred = false;
-  setCountdownVisible(false); // Ensure countdown is hidden
+  setCountdownVisible(false);
 
-  // Single inactivity timeout (e.g., 41s of inactivity)
+  // First 41s idle timer
   inactivityTimeout = setTimeout(() => {
     if (!isUserTalking && !isAvatarSpeaking) {
-      console.log("🛑 Idle timeout reached. Ending session...");
-      handleTimeoutEndSession(); // This will trigger the transition GIF and end
-    } else {
-      console.log("✅ Activity detected. Restarting inactivity timer.");
-      resetInactivityTimer(); // Restart timer if activity is detected
-    }
-  }, 41000); // Trigger session end after 41s of inactivity
-};
+      console.log("⏳ No activity detected, starting grace countdown...");
+      setCountdownVisible(true);
 
+      // 10s grace period
+      graceTimeout = setTimeout(() => {
+        if (!isUserTalking && !isAvatarSpeaking) {
+          console.log("🛑 Still idle after grace period. Ending session...");
+          handleTimeoutEndSession();
+        } else {
+          console.log("✅ Activity resumed during grace period. Resetting.");
+          resetInactivityTimer(); // Fully reset both timers again
+        }
+      }, 10000);
+    } else {
+      console.log("✅ Activity detected before grace. Restarting main timer.");
+      resetInactivityTimer(); // Restart early if activity is detected
+    }
+  }, 41000);
+};
 const handleTimeoutEndSession = () => {
   if (hasEndedRef.current || interruptionOccurred) return; // Don't end session if interrupted
   

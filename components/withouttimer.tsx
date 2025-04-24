@@ -45,13 +45,12 @@ export default function InteractiveAvatar() {
   const [sessionEnded, setSessionEnded] = useState(false);
   const hasEndedRef = useRef(false);
   const [countdownVisible, setCountdownVisible] = useState(false);
+  const [isAvatarSpeaking, setIsAvatarSpeaking] = useState(false);
  
-  
 
   function baseApiUrl() {
     return process.env.NEXT_PUBLIC_BASE_API_URL;
   }
-
   async function fetchAccessToken() {
     try {
       const response = await fetch("/api/get-access-token", {
@@ -66,33 +65,32 @@ export default function InteractiveAvatar() {
     return "";
   }
 
-
   const startSession = async () => {
- 
     setSessionEnded(false);
     hasEndedRef.current = false;
-  
-    // 🔄 Start GIF and loader logic
     await showStartSessionGif(() => setIsLoadingSession(true));
-  
     const newToken = await fetchAccessToken();
-  
-    setIsLoadingSession(true); // 🔄 Optional: in case loader is unmounted too early
-  
+    setIsLoadingSession(true); 
     avatar.current = new StreamingAvatar({
       token: newToken,
       basePath: baseApiUrl(),
     });
   
-    avatar.current.on(StreamingEvents.STREAM_READY, (event) => {
+    avatar.current?.on(StreamingEvents.STREAM_READY, (event) => {
       console.log(">>>>> Stream ready:", event.detail);
       setStream(event.detail);
       setTimeout(() => setMaskVisible(true), 0);
-  
+    
       const avatarVideo = document.querySelector(".avatar-stream") as HTMLElement;
       if (avatarVideo) avatarVideo.style.opacity = "1";
+      avatar.current?.on(StreamingEvents.AVATAR_START_TALKING, () => {
+        setIsAvatarSpeaking(true);
+        resetInactivityTimer(); 
+      });
+      avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
+        setIsAvatarSpeaking(false);
+      });
     });
-  
     try {
       const res = await avatar.current.createStartAvatar({
         quality: AvatarQuality.High,
@@ -111,43 +109,27 @@ export default function InteractiveAvatar() {
         language,
         disableIdleTimeout: true,
       });
-  
       setData(res);
   
       await avatar.current.startVoiceChat({ useSilencePrompt: true });
-  
-      // Delay before speaking (5 seconds)
       await new Promise((resolve) => setTimeout(resolve, 5000));
-  
       await avatar.current.speak({
         text: "Hello, I am your interactive avatar. Let's begin!",
       });
-  
-// Start countdown GIF visibility exactly after 41 seconds from now
-const countdownTimeout = setTimeout(() => {
-  setCountdownVisible(true);
-}, 41000);
-setSessionTimeout(countdownTimeout); // Save so it can be cleared on end
-
-      
+      resetInactivityTimer();
       setChatMode("voice_mode");
-
    
   } catch (error) {
     console.error("Error starting avatar session:", error);
   } finally {
     setIsLoadingSession(false);
   }
-
-  // Final UI transition
   startSessionTransition();
 };
-  
-
   let isGifLoaded = false; 
+  
 const startSessionTransition = () => {
   if (isGifLoaded) return;
-
   isGifLoaded = true; 
 
   // Create the GIF image for transition
@@ -165,96 +147,148 @@ const startSessionTransition = () => {
   if (mainUpDiv) {
     mainUpDiv.appendChild(gifImage);
   }
-
   setTimeout(() => {
     const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
     const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement;
-
-    if (mainOneDiv) mainOneDiv.style.opacity = "1"; // Fade in main video
-    if (videoBackground) videoBackground.style.opacity = "1"; // Fade in background video
+    if (mainOneDiv) mainOneDiv.style.opacity = "1"; 
+    if (videoBackground) videoBackground.style.opacity = "1"; 
   }, 0);
 
   setTimeout(() => {
     if (gifImage.parentElement) {
       gifImage.parentElement.removeChild(gifImage);
     }
-    setButtonsVisible(true); // Show buttons after GIF removal
+    setButtonsVisible(true); 
   }, 2000);
 };
-  async function handleSpeak() {
-    setIsLoadingRepeat(true);
-    if (!avatar.current) {
-      setDebug("Avatar API not initialized");
-      return;
-    }
-    await avatar.current
-      .speak({ text: text, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC })
-      .catch((e) => {
-        setDebug(e.message);
-      });
-    setIsLoadingRepeat(false);
+ 
+async function handleSpeak() {
+  setIsLoadingRepeat(true);
+  if (!avatar.current) {
+    setDebug("Avatar API not initialized");
+    return;
   }
 
-  async function handleInterrupt() {
-    if (!avatar.current) {
-      setDebug("Avatar API not initialized");
-      return;
-    }
-    await avatar.current.interrupt().catch((e) => {
+  await avatar.current
+    .speak({ text: text, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC })
+    .catch((e) => {
       setDebug(e.message);
     });
+  resetInactivityTimer(); 
+  setIsLoadingRepeat(false);
+}
+
+
+let inactivityTimerStart: number | null = null;
+let interruptionOccurred = false;  // Flag to track interruption within 52 seconds
+let inactivityTimeout: ReturnType<typeof setTimeout> | null = null;
+let graceTimeout: ReturnType<typeof setTimeout> | null = null;
+
+const handleUserSpeechStart = () => {
+  setIsUserTalking(true);  
+  resetInactivityTimer();  
+  handleInterrupt(); 
+};
+const handleUserSpeechEnd = () => {
+  setIsUserTalking(false);  
+};
+
+async function handleInterrupt() {
+  if (!avatar.current) {
+    setDebug("Avatar API not initialized");
+    return;
   }
 
-  const handleTimeoutEndSession = () => {
-    if (hasEndedRef.current) return; // prevent double-trigger
-  
-    setButtonsVisible(false); // 🔥 Instantly hide the end session button
-  
-    showCloseSessionGif();
-  
-    setTimeout(() => {
-      endSession();
-    }, 1000);
-  };
+  if (inactivityTimerStart !== null) {
+    interruptionOccurred = true;
 
-  const cleanUpSessionSync = () => {
-    try {
-      avatar.current?.interrupt(); // Just fire, don’t await
-      avatar.current?.closeVoiceChat?.();
-      avatar.current?.stopAvatar();
-    } catch (e) {
-      console.warn("Failed to clean session in beforeunload:", e);
+    if (inactivityTimeout) {
+      clearTimeout(inactivityTimeout);
+      inactivityTimeout = null;
     }
-  };
+    if (graceTimeout) {
+      clearTimeout(graceTimeout);
+      graceTimeout = null;
+    }
 
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      cleanUpSessionSync(); // Best-effort cleanup
-    };
-  
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, []);
-  
+    setCountdownVisible(false);
+    resetInactivityTimer();
 
-// Automatically trigger session end when timeout occurs
-useEffect(() => {
-  if (sessionTimeout) {
-    const timeoutHandler = setTimeout(() => {
-      handleTimeoutEndSession();  // Trigger end session when timeout is reached
-    }, 53000);  // Adjust timeout duration if necessary
-
-    return () => clearTimeout(timeoutHandler);  // Cleanup timeout
+    try {
+      await avatar.current.interrupt();
+    } catch (e) {
+      if (e instanceof Error) {
+        setDebug(e.message);
+      } else {
+        setDebug("An unknown error occurred during interruption.");
+      }
+    }
+  } else {
+    console.warn("Inactivity timer has not started yet.");
   }
-}, [sessionTimeout]);
+}
 
 
-// Add logic to hide the avatar and .main-one div when the session ends
+const resetInactivityTimer = () => {
+  console.log("🔥 Resetting inactivity timer");
+
+  // Clear previous timers
+  if (inactivityTimeout) {
+    clearTimeout(inactivityTimeout);
+    inactivityTimeout = null;
+  }
+  if (graceTimeout) {
+    clearTimeout(graceTimeout);
+    graceTimeout = null;
+  }
+
+  interruptionOccurred = false;
+  setCountdownVisible(false); // Ensure countdown is hidden
+
+  // Single inactivity timeout (e.g., 41s of inactivity)
+  inactivityTimeout = setTimeout(() => {
+    if (!isUserTalking && !isAvatarSpeaking) {
+      console.log("🛑 Idle timeout reached. Ending session...");
+      handleTimeoutEndSession(); // This will trigger the transition GIF and end
+    } else {
+      console.log("✅ Activity detected. Restarting inactivity timer.");
+      resetInactivityTimer(); // Restart timer if activity is detected
+    }
+  }, 41000); // Trigger session end after 41s of inactivity
+};
+
+const handleTimeoutEndSession = () => {
+  if (hasEndedRef.current || interruptionOccurred) return; // Don't end session if interrupted
+  
+  setButtonsVisible(false); 
+  showCloseSessionGif();
+  setTimeout(() => {
+    endSession();
+  }, 1000);
+};
+
+const cleanUpSessionSync = () => {
+  try {
+    avatar.current?.interrupt(); 
+    avatar.current?.closeVoiceChat?.();
+    avatar.current?.stopAvatar();
+  } catch (e) {
+    console.warn("Failed to clean session in beforeunload:", e);
+  }
+};
+
+useEffect(() => {
+  const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+    cleanUpSessionSync(); 
+  };
+  window.addEventListener("beforeunload", handleBeforeUnload);
+  return () => {
+    window.removeEventListener("beforeunload", handleBeforeUnload);
+  };
+}, []);
+
 const endSession = async () => {
   if (hasEndedRef.current || !avatar.current) return;
-
   hasEndedRef.current = true;
   console.log("Ending session...");
 
@@ -297,10 +331,6 @@ const endSession = async () => {
     screensaverVideo.play();
   }
 };
-
-
-
-
 const showCloseSessionGif = () => {
   // Create the GIF image
   const gifImage = document.createElement("img");
@@ -312,43 +342,33 @@ const showCloseSessionGif = () => {
   gifImage.style.top = "0";
   gifImage.style.opacity = "1";
   gifImage.style.zIndex = "1000";
-
   // Append GIF to .main-up
   const mainUpDiv = document.querySelector(".main-up");
   if (mainUpDiv) {
     mainUpDiv.appendChild(gifImage);
   }
-
 // Select the .main-one div and cast it to HTMLElement
 const mainOneDiv = document.querySelector(".main-one") as HTMLElement | null;
-
 if (mainOneDiv) {
   setTimeout(() => {
     mainOneDiv.style.opacity = "0"; 
   }, 4000);
 }
-
   // After the GIF finishes, hide the GIF and show .main-up
   setTimeout(() => {
     if (gifImage.parentElement) {
       gifImage.parentElement.removeChild(gifImage);  // Remove the GIF
     }
-
 // Select the .main-up element and cast it to HTMLElement
 const mainUpDiv = document.querySelector(".main-up") as HTMLElement | null;
-
-
 setTimeout(() => {
   if (mainUpDiv) {
     mainUpDiv.style.transition = "opacity 1s ease-out"; // Smooth transition for the .main-up div
     mainUpDiv.style.opacity = "1"; // Show .main-up
   }
 }, 0); // 2000 milliseconds = 2 seconds
-
-
 },4000); // Wait for the GIF to finish (4 seconds) before starting the 2-second delay
 };
-
 const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
   return new Promise((resolve) => {
     const screensaverVideo = document.querySelector(".screensaver-video") as HTMLElement;
@@ -375,18 +395,15 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
       if (screensaverVideo) {
         screensaverVideo.style.display = "none";
       }
-
       // 🔄 Trigger loader screen after 2s
       showLoaderCallback();
     }, 2000);
-
     gifImage.onload = () => {
       setTimeout(() => {
         gifImage.remove();
         resolve();
       }, 4000);
     };
-
     gifImage.onerror = () => {
       gifImage.remove();
       if (screensaverVideo) {
@@ -396,10 +413,6 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
     };
   });
 };
-
-
-
-
     useEffect(() => {
       // Ensure screensaver video restarts on component mount
       const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
@@ -410,37 +423,7 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
         screensaverVideo.play();
       }
     }, []);
-    
-    
-// Function to complete session end after GIF
-const completeEndSession = async () => {
-  setIsEndingSession(true);  // Set session ending state to true
-
-  const avatarVideo = document.querySelector(".avatar-stream") as HTMLVideoElement;
-  const backgroundVideo = document.querySelector("#main-video1") as HTMLVideoElement;
-  const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
-
-  if (avatarVideo && backgroundVideo) {
-    avatarVideo.style.transition = "opacity 1s ease-out";
-    backgroundVideo.style.transition = "opacity 1s ease-out";
-    avatarVideo.style.opacity = "0";  // Hide the avatar video
-    backgroundVideo.style.opacity = "0";  // Hide background video
-  }
-
-  if (mainOneDiv) {
-    mainOneDiv.style.transition = "opacity 1s ease-out";
-    mainOneDiv.style.opacity = "0";  // Hide the main div
-  }
-
-  setTimeout(async () => {
-    // Complete session logic
-    // You can stop the avatar and clean up other session-related states here
-    setButtonsVisible(false);  // Hide buttons after session ends
-  }, 1000);  // Wait for fade-out to complete before hiding the buttons
-};
-
- 
-
+  
   const handleChangeChatMode = useMemoizedFn(async (v) => {
     if (v === chatMode) {
       return;
@@ -452,7 +435,6 @@ const completeEndSession = async () => {
     }
     setChatMode(v);
   });
-
   const previousText = usePrevious(text);
   useEffect(() => {
     if (!previousText && text) {
@@ -462,11 +444,6 @@ const completeEndSession = async () => {
     }
   }, [text, previousText]);
 
-  useEffect(() => {
-    return () => {
-      endSession();
-    };
-  }, []);
 
   useEffect(() => {
     if (stream && mediaStream.current) {
@@ -477,10 +454,6 @@ const completeEndSession = async () => {
       };
     }
   }, [mediaStream, stream]);
-
-  useEffect(() => {
-    endSession(); // clean stale stuff from last reload
-  }, []);
 
   return (
     <div className="main-wrapper" style={{ position: "relative" }}>
