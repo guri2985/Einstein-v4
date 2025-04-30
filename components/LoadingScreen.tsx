@@ -44,7 +44,7 @@ export default function LoadingScreen({ onComplete, isLoadingSession }: LoadingS
       <div className="flex flex-col items-center justify-center space-y-4">
         {/* Image above the progress bar */}
         <img 
-          src="https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/thumbnail_Initialising-text.png"
+          src="https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Initialising.png"
           alt="Initializing..."
           className="w-[500px] h-auto"
         />
@@ -57,10 +57,10 @@ export default function LoadingScreen({ onComplete, isLoadingSession }: LoadingS
               width: `${progress}%`,
               backgroundImage: `repeating-linear-gradient(
                 -45deg,
-                rgb(243, 116, 116),
-                rgb(243, 116, 116),10px,
-                #f42323 10px,
-                #f42323 20px
+rgba(235, 202, 124, 0.74),
+               rgba(235, 202, 124, 0.74),10px,
+                #ebc97c 10px,
+                #ebc97c 20px
               )`,
             }}
           />

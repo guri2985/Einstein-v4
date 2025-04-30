@@ -184,6 +184,7 @@ let interruptionOccurred = false;  // Flag to track interruption within 52 secon
 let inactivityTimeout: ReturnType<typeof setTimeout> | null = null;
 let graceTimeout: ReturnType<typeof setTimeout> | null = null;
 
+
 const handleUserSpeechStart = () => {
   setIsUserTalking(true);  
   resetInactivityTimer();  
@@ -444,7 +445,12 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
     }
   }, [text, previousText]);
 
-
+  useEffect(() => {
+    return () => {
+      endSession();
+    };
+  }, []);
+  
   useEffect(() => {
     if (stream && mediaStream.current) {
       mediaStream.current.srcObject = stream;
@@ -454,6 +460,8 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
       };
     }
   }, [mediaStream, stream]);
+
+
 
   return (
     <div className="main-wrapper" style={{ position: "relative" }}>
@@ -465,7 +473,7 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
             width: "100%", }}>
         <video
           className="screensaver-video"
-          src="https://ounocreatstg.wpenginepowered.com/videos/william-screensaver.mp4"
+          src="https://ounocreatstg.wpenginepowered.com/videos/Samuel-screensaver.mp4"
           autoPlay
           loop
           muted
@@ -492,21 +500,21 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
 
         <video
           id="main-video1"
-          src="https://ounocreatstg.wpenginepowered.com/videos/main-video.mp4"
+          src="https://ounocreatstg.wpenginepowered.com/videos/Samuel Static Loop v1.mp4"
           autoPlay
           loop
           muted
           style={{
             position: "absolute",
-            top: "0",
+            top: "40px",
             left: "0",
             width: "100%",
             height: "100%",
             objectFit: "cover",
             opacity: "0", // Initially hidden
             zIndex: "10",
-            maskImage: 'radial-gradient(circle at 50% 12%, transparent 130px, rgb(255, 255, 255) 180px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 50% 12%, transparent 130px, rgb(255, 255, 255) 180px)', 
+            maskImage: 'radial-gradient(circle at 51% 10%, transparent 183px, rgb(255, 255, 255) 233px)', 
+            WebkitMaskImage: 'radial-gradient(circle at 51% 10%, transparent 183px, rgb(255, 255, 255) 233px)', 
           }}
         />
         <video
@@ -517,10 +525,10 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
           style={{
             objectFit: "contain",
             position: "absolute",
-            top: "330px",
-            left: "50.7%",
+            top: "355px",
+            left: "50%",
             transform: "translate(-50%, -50%)",  // Centers the avatar on the screen
-            width: "1010px",
+            width: "1100px",
           }}
         />
       </div>
@@ -545,7 +553,7 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
                 size="lg"
                 onClick={startSession}
                 style={{
-                  backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Startbutton.png")',
+                  backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/START-CHAT.png")',
                   backgroundSize: 'cover',  // Ensure the image covers the entire button
                   backgroundPosition: 'center',  // Center the image in the button
                   backgroundRepeat: 'no-repeat',  // Ensure the image doesn't repeat
@@ -571,7 +579,7 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
                       size="lg"
                       onClick={handleTimeoutEndSession}
                       style={{
-                        backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Endbutton.png")',
+                        backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/END-CHAT.png")',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',
