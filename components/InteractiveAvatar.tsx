@@ -297,6 +297,7 @@ setTimeout(() => {
 }, 0); 
 }, 4000); 
 };
+
 const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
   return new Promise((resolve) => {
     const screensaverVideo = document.querySelector(".screensaver-video") as HTMLElement;
@@ -314,6 +315,8 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
     });
 
     const mainUpDiv = document.querySelector(".main-up") as HTMLElement;
+    const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
+
     if (mainUpDiv) {
       mainUpDiv.appendChild(gifImage);
     }
@@ -322,24 +325,35 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
       if (screensaverVideo) {
         screensaverVideo.style.display = "none";
       }
-      // 🔄 Trigger loader screen after 2s
       showLoaderCallback();
     }, 2000);
+
     gifImage.onload = () => {
       setTimeout(() => {
         gifImage.remove();
+        // ✅ Show main-one after transition ends
+        if (mainOneDiv) {
+          mainOneDiv.style.opacity = "1";
+        }
         resolve();
       }, 4000);
     };
+
     gifImage.onerror = () => {
       gifImage.remove();
       if (screensaverVideo) {
         screensaverVideo.style.display = "none";
       }
+      // ✅ Show main-one even if GIF fails to load
+      if (mainOneDiv) {
+        mainOneDiv.style.opacity = "1";
+      }
       resolve();
     };
   });
 };
+
+
     useEffect(() => {
       const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
       if (screensaverVideo) {

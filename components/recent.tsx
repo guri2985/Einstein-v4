@@ -64,7 +64,6 @@ export default function InteractiveAvatar() {
     }
     return "";
   }
-
   const startSession = async () => {
     setSessionEnded(false);
     hasEndedRef.current = false;
@@ -127,7 +126,7 @@ export default function InteractiveAvatar() {
   startSessionTransition();
 };
   let isGifLoaded = false; 
-  
+ 
 const startSessionTransition = () => {
   if (isGifLoaded) return;
   isGifLoaded = true; 
@@ -161,7 +160,6 @@ const startSessionTransition = () => {
     setButtonsVisible(true); 
   }, 2000);
 };
- 
 async function handleSpeak() {
   setIsLoadingRepeat(true);
   if (!avatar.current) {
@@ -177,7 +175,6 @@ async function handleSpeak() {
 
   setIsLoadingRepeat(false);
 }
-
 const handleUserSpeechStart = () => {
   setIsUserTalking(true);  
 
@@ -186,15 +183,12 @@ const handleUserSpeechStart = () => {
 const handleUserSpeechEnd = () => {
   setIsUserTalking(false);  
 };
-
 async function handleInterrupt() {
   if (!avatar.current) {
     setDebug("Avatar API not initialized");
     return;
   }
 }
-
-
 
 const handleTimeoutEndSession = async () => {
   showCloseSessionGif(); 
@@ -210,10 +204,8 @@ const handleTimeoutEndSession = async () => {
   window.location.reload();
 };
 
-// Event-based ending
 (avatar.current as any)?.on(StreamingEvents.STREAM_DISCONNECTED, () => {
-  showCloseSessionGif();
-  handleTimeoutEndSession();
+  handleTimeoutEndSession(); 
 });
 
 
@@ -330,7 +322,6 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
       if (screensaverVideo) {
         screensaverVideo.style.display = "none";
       }
-      // 🔄 Trigger loader screen after 2s
       showLoaderCallback();
     }, 2000);
     gifImage.onload = () => {
@@ -379,6 +370,12 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
   }, [text, previousText]);
 
   useEffect(() => {
+    return () => {
+      endSession();
+    };
+  }, []);
+
+  useEffect(() => {
     if (stream && mediaStream.current) {
       mediaStream.current.srcObject = stream;
       mediaStream.current.onloadedmetadata = () => {
@@ -398,7 +395,7 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
             width: "100%", }}>
         <video
           className="screensaver-video"
-          src="https://ounocreatstg.wpenginepowered.com/videos/Samuel-screensaver.mp4"
+          src="https://ounocreatstg.wpenginepowered.com/videos/Samuel Screensaver3.mp4"
           autoPlay
           loop
           muted
@@ -425,21 +422,21 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
 
           <video
           id="main-video1"
-          src="https://ounocreatstg.wpenginepowered.com/videos/Samuel Static Loop v1.mp4"
+          src="https://ounocreatstg.wpenginepowered.com/videos/Samuel Static Loop v2.mp4"
           autoPlay
           loop
           muted
           style={{
             position: "absolute",
-            top: "0px",
+            top: "-40px",
             left: "0",
             width: "100%",
             height: "100%",
             objectFit: "cover",
             opacity: "0", // Initially hidden
             zIndex: "10",
-            maskImage: 'radial-gradient(circle at 48% 10%, transparent 139px, rgb(255, 255, 255) 176px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 48% 10%, transparent 139px, rgb(255, 255, 255) 176px)', 
+            maskImage: 'radial-gradient(circle at 46% 10%, transparent 173px, rgb(255, 255, 255) 217px)', 
+            WebkitMaskImage: 'radial-gradient(circle at 46% 10%, transparent 173px, rgb(255, 255, 255) 217px)', 
           }}
         />
         <video
@@ -450,7 +447,7 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
           style={{
             objectFit: "contain",
             position: "absolute",
-            top: "315px",
+            top: "300px",
             left: "50%",
             transform: "translate(-50%, -50%)",  // Centers the avatar on the screen
             width: "1100px",
@@ -474,20 +471,23 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
                 repeatType: "reverse",
               }}
             >
-              <Button 
-                className="w-full text-white bg-main"
-                size="lg"
-                onClick={startSession}
-                style={{
-                      backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/START-CHAT.png")',
-                  backgroundSize: 'cover',  // Ensure the image covers the entire button
-                  backgroundPosition: 'center',  // Center the image in the button
-                  backgroundRepeat: 'no-repeat',  // Ensure the image doesn't repeat
-                  backgroundColor: 'transparent',
-                  width: '260px',
-                  height: '100px',
-                }}
-              />  
+        <Button 
+  className="w-full start-btn focus:outline-none active:outline-none hover:opacity-100 hover:filter-none active:opacity-100"
+  size="lg"
+  onClick={startSession}
+  style={{
+    backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/START-CHAT.png")',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundColor: 'transparent',
+    width: '260px',
+    height: '100px',
+    boxShadow: 'none',
+  }}
+/>
+
+
             </motion.div>
           ) : isLoadingSession ? (
             <LoadingScreen onComplete={() => setIsLoadingSession(false)} isLoadingSession={isLoadingSession} />
