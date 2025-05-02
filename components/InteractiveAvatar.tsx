@@ -64,7 +64,6 @@ export default function InteractiveAvatar() {
     }
     return "";
   }
-
   const startSession = async () => {
     setSessionEnded(false);
     hasEndedRef.current = false;
@@ -127,7 +126,7 @@ export default function InteractiveAvatar() {
   startSessionTransition();
 };
   let isGifLoaded = false; 
-  
+ 
 const startSessionTransition = () => {
   if (isGifLoaded) return;
   isGifLoaded = true; 
@@ -161,7 +160,6 @@ const startSessionTransition = () => {
     setButtonsVisible(true); 
   }, 2000);
 };
- 
 async function handleSpeak() {
   setIsLoadingRepeat(true);
   if (!avatar.current) {
@@ -177,7 +175,6 @@ async function handleSpeak() {
 
   setIsLoadingRepeat(false);
 }
-
 const handleUserSpeechStart = () => {
   setIsUserTalking(true);  
 
@@ -186,15 +183,12 @@ const handleUserSpeechStart = () => {
 const handleUserSpeechEnd = () => {
   setIsUserTalking(false);  
 };
-
 async function handleInterrupt() {
   if (!avatar.current) {
     setDebug("Avatar API not initialized");
     return;
   }
 }
-
-
 
 const handleTimeoutEndSession = async () => {
   showCloseSessionGif(); 
@@ -210,10 +204,8 @@ const handleTimeoutEndSession = async () => {
   window.location.reload();
 };
 
-// Event-based ending
 (avatar.current as any)?.on(StreamingEvents.STREAM_DISCONNECTED, () => {
-  showCloseSessionGif();
-  handleTimeoutEndSession();
+  handleTimeoutEndSession(); 
 });
 
 
@@ -431,15 +423,15 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
           muted
           style={{
             position: "absolute",
-            top: "0px",
+            top: "-16px",
             left: "0",
             width: "100%",
             height: "100%",
             objectFit: "cover",
             opacity: "0", // Initially hidden
             zIndex: "10",
-            maskImage: 'radial-gradient(circle at 50% 10%, transparent 132px, rgb(255, 255, 255) 171px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 50% 10%, transparent 132px, rgb(255, 255, 255) 171px)', 
+            maskImage: 'radial-gradient(circle at 48% 10%, transparent 162px, rgb(255, 255, 255) 188px)', 
+            WebkitMaskImage: 'radial-gradient(circle at 48% 10%, transparent 162px, rgb(255, 255, 255) 188px)', 
           }}
         />
         <video
@@ -450,7 +442,7 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
           style={{
             objectFit: "contain",
             position: "absolute",
-            top: "315px",
+            top: "300px",
             left: "50%",
             transform: "translate(-50%, -50%)",  // Centers the avatar on the screen
             width: "1100px",
