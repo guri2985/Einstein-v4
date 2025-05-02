@@ -127,6 +127,7 @@ height:100%;
 
 .start-btn, .start-btn:hover, .start-btn:active, .start-btn:focus {
 background-color: transparent!important;
+opacity:1!important;
 
 }
 
@@ -134,4 +135,8 @@ background-color: transparent!important;
   transition-property: none!important;
   transition-timing-function: ease;
   transition-duration: inherit;
+}
+.text-default-foreground {
+  --tw-text-opacity: 0!important;
+  color: transparent!important;
 }

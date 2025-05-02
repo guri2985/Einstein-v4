@@ -371,6 +371,12 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
   }, [text, previousText]);
 
   useEffect(() => {
+    return () => {
+      endSession();
+    };
+  }, []);
+
+  useEffect(() => {
     if (stream && mediaStream.current) {
       mediaStream.current.srcObject = stream;
       mediaStream.current.onloadedmetadata = () => {
@@ -390,7 +396,7 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
             width: "100%", }}>
         <video
           className="screensaver-video"
-          src="https://ounocreatstg.wpenginepowered.com/videos/Samuel-screensaver.mp4"
+          src="https://ounocreatstg.wpenginepowered.com/videos/Samuel Screensaver3.mp4"
           autoPlay
           loop
           muted
@@ -466,8 +472,8 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
                 repeatType: "reverse",
               }}
             >
-             <Button 
-  className="w-full start-btn focus:outline-none active:outline-none hover:bg-transparent active:bg-transparent"
+        <Button 
+  className="w-full start-btn focus:outline-none active:outline-none hover:opacity-100 hover:filter-none active:opacity-100"
   size="lg"
   onClick={startSession}
   style={{
@@ -481,6 +487,7 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
     boxShadow: 'none',
   }}
 />
+
 
             </motion.div>
           ) : isLoadingSession ? (
