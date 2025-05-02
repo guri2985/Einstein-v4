@@ -436,8 +436,8 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
             objectFit: "cover",
             opacity: "0", // Initially hidden
             zIndex: "10",
-            maskImage: 'radial-gradient(circle at 50% 10%, transparent 177px, rgb(255, 255, 255) 210px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 50% 10%, transparent 177px, rgb(255, 255, 255) 210px)', 
+            maskImage: 'radial-gradient(circle at 50% 10%, transparent 173px, rgb(255, 255, 255) 217px)', 
+            WebkitMaskImage: 'radial-gradient(circle at 50% 10%, transparent 173px, rgb(255, 255, 255) 217px)', 
           }}
         />
         <video
