@@ -52,15 +52,15 @@ export default function LoadingScreen({ onComplete, isLoadingSession }: LoadingS
         {/* Progress Bar */}
         <div className="w-[450px] h-5 bg-gray-300 rounded-full overflow-hidden meter relative">
           <div
-            className="h-full bg-red-500 transition-all duration-200 ease-in-out relative"
+            className="h-full bg-[a1915e] 500 transition-all duration-200 ease-in-out relative"
             style={{
               width: `${progress}%`,
               backgroundImage: `repeating-linear-gradient(
                 -45deg,
-rgba(235, 202, 124, 0.74),
-               rgba(235, 202, 124, 0.74),10px,
-                #ebc97c 10px,
-                #ebc97c 20px
+rgba(201, 177, 96, 0.83),
+               rgba(201, 177, 96, 0.83), 10px,
+#c4aa54 10px,
+            #c4aa54  20px
               )`,
             }}
           />

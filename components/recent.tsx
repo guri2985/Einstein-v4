@@ -178,12 +178,10 @@ async function handleSpeak() {
   setIsLoadingRepeat(false);
 }
 
-
 let inactivityTimerStart: number | null = null;
 let interruptionOccurred = false;  // Flag to track interruption within 52 seconds
 let inactivityTimeout: ReturnType<typeof setTimeout> | null = null;
 let graceTimeout: ReturnType<typeof setTimeout> | null = null;
-
 
 const handleUserSpeechStart = () => {
   setIsUserTalking(true);  
@@ -211,8 +209,6 @@ async function handleInterrupt() {
       clearTimeout(graceTimeout);
       graceTimeout = null;
     }
-
-    setCountdownVisible(false);
     resetInactivityTimer();
 
     try {
@@ -229,51 +225,47 @@ async function handleInterrupt() {
   }
 }
 
-const handleTimeoutEndSession = async () => {
-  if (hasEndedRef.current || interruptionOccurred) return;
-
-  setButtonsVisible(false);
-  showCloseSessionGif();
-
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  avatar.current?.stopAvatar();
-
-  endSession();
-};
-
-
 const resetInactivityTimer = () => {
   console.log("🔥 Resetting inactivity timer");
   if (inactivityTimeout) {
     clearTimeout(inactivityTimeout);
     inactivityTimeout = null;
   }
-  if (graceTimeout) {
-    clearTimeout(graceTimeout);
-    graceTimeout = null;
-  }
-
   interruptionOccurred = false;
-  setCountdownVisible(false); 
   inactivityTimeout = setTimeout(() => {
     if (!isUserTalking && !isAvatarSpeaking) {
-      console.log("🛑 Idle timeout reached. Ending session...");
-      showCloseSessionGif();
-      handleTimeoutEndSession(); 
+      console.log("🛑 No activity detected. Ending session with GIF transition...");
+      showCloseSessionGif(); 
+      handleTimeoutEndSession();
     } else {
-      console.log("✅ Activity detected. Restarting inactivity timer.");
+      console.log("✅ Activity detected before timeout. Restarting timer.");
       resetInactivityTimer(); 
     }
-  }, 70000);  
+  }, 41000);
 };
+
+const handleTimeoutEndSession = async () => {
+  if (hasEndedRef.current || interruptionOccurred) return;
+  showCloseSessionGif(); 
+  setButtonsVisible(false);
+
+  await new Promise(resolve => setTimeout(resolve, 800));
+  try {
+    await avatar.current?.stopAvatar();
+  } catch (e) {
+    console.warn("Failed to stop avatar:", e);
+  }
+  await new Promise(resolve => setTimeout(resolve, 800));
+  endSession(); 
+};
+
 
 const cleanUpSessionSync = () => {
   try {
+    avatar.current?.stopAvatar();
     avatar.current?.interrupt(); 
     avatar.current?.closeVoiceChat?.();
-    setTimeout(() => {
-      avatar.current?.stopAvatar();
-    }, 700);
+  
   } catch (e) {
     console.warn("Failed to clean session in beforeunload:", e);
   }
@@ -288,40 +280,33 @@ useEffect(() => {
     window.removeEventListener("beforeunload", handleBeforeUnload);
   };
 }, []);
-
 const endSession = async () => {
   if (hasEndedRef.current || !avatar.current) return;
   hasEndedRef.current = true;
   console.log("Ending session...");
 
   try {
-    setTimeout(() => {
-      avatar.current?.stopAvatar();
-    }, 700);
+    await avatar.current.interrupt();
+    await avatar.current.closeVoiceChat?.();
+    await avatar.current.stopAvatar();
     avatar.current = null;
   } catch (error) {
     console.warn("Error while stopping avatar:", error);
   }
-
   if (sessionTimeout) {
     clearTimeout(sessionTimeout);
     setSessionTimeout(null);
   }
-
   setSessionEnded(true);
   setButtonsVisible(false);
   setStream(undefined);
   setMaskVisible(false);
   setCountdownVisible(false);
-
-  // Fade out UI
   const avatarVideo = document.querySelector(".avatar-stream") as HTMLVideoElement;
   const backgroundVideo = document.querySelector("#main-video1") as HTMLVideoElement;
   const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
-
   if (avatarVideo) avatarVideo.style.opacity = "0";
   if (backgroundVideo) backgroundVideo.style.opacity = "0";
-
   if (screensaverVideo) {
     screensaverVideo.style.display = "block";
     screensaverVideo.pause();
@@ -330,9 +315,7 @@ const endSession = async () => {
     screensaverVideo.play();
   }
 };
-
 const showCloseSessionGif = () => {
-  // Create the GIF image
   const gifImage = document.createElement("img");
   gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif";
   gifImage.style.position = "absolute";
@@ -342,37 +325,32 @@ const showCloseSessionGif = () => {
   gifImage.style.top = "0";
   gifImage.style.opacity = "1";
   gifImage.style.zIndex = "1000";
-  // Append GIF to .main-up
   const mainUpDiv = document.querySelector(".main-up");
   if (mainUpDiv) {
     mainUpDiv.appendChild(gifImage);
   }
-// Select the .main-one div and cast it to HTMLElement
 const mainOneDiv = document.querySelector(".main-one") as HTMLElement | null;
 if (mainOneDiv) {
   setTimeout(() => {
     mainOneDiv.style.opacity = "0"; 
-  }, 4000);
+  }, 2000);
 }
-  // After the GIF finishes, hide the GIF and show .main-up
   setTimeout(() => {
     if (gifImage.parentElement) {
-      gifImage.parentElement.removeChild(gifImage);  // Remove the GIF
+      gifImage.parentElement.removeChild(gifImage); 
     }
-// Select the .main-up element and cast it to HTMLElement
 const mainUpDiv = document.querySelector(".main-up") as HTMLElement | null;
 setTimeout(() => {
   if (mainUpDiv) {
-    mainUpDiv.style.transition = "opacity 1s ease-out"; // Smooth transition for the .main-up div
-    mainUpDiv.style.opacity = "1"; // Show .main-up
+    mainUpDiv.style.transition = "opacity 1s ease-out"; 
+    mainUpDiv.style.opacity = "1"; 
   }
-}, 0); // 2000 milliseconds = 2 seconds
-},4000); // Wait for the GIF to finish (4 seconds) before starting the 2-second delay
+}, 0); 
+},4000); 
 };
 const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
   return new Promise((resolve) => {
     const screensaverVideo = document.querySelector(".screensaver-video") as HTMLElement;
-
     const gifImage = document.createElement("img");
     gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif";
     Object.assign(gifImage.style, {
@@ -414,7 +392,6 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
   });
 };
     useEffect(() => {
-      // Ensure screensaver video restarts on component mount
       const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
       if (screensaverVideo) {
         screensaverVideo.pause();  
@@ -445,12 +422,6 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
   }, [text, previousText]);
 
   useEffect(() => {
-    return () => {
-      endSession();
-    };
-  }, []);
-  
-  useEffect(() => {
     if (stream && mediaStream.current) {
       mediaStream.current.srcObject = stream;
       mediaStream.current.onloadedmetadata = () => {
@@ -459,8 +430,6 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
       };
     }
   }, [mediaStream, stream]);
-
-
 
   return (
     <div className="main-wrapper" style={{ position: "relative" }}>
@@ -497,7 +466,7 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
       {/* Avatar video and new background */}
       <div className="main-one" style={{ opacity: "0", transition: "opacity 0s ease-in-out" }}>
 
-        <video
+          <video
           id="main-video1"
           src="https://ounocreatstg.wpenginepowered.com/videos/Samuel Static Loop v1.mp4"
           autoPlay
@@ -505,7 +474,7 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
           muted
           style={{
             position: "absolute",
-            top: "40px",
+            top: "0px",
             left: "0",
             width: "100%",
             height: "100%",
@@ -524,13 +493,14 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
           style={{
             objectFit: "contain",
             position: "absolute",
-            top: "355px",
+            top: "315px",
             left: "50%",
             transform: "translate(-50%, -50%)",  // Centers the avatar on the screen
             width: "1100px",
           }}
         />
       </div>
+     
   
       {/* Session Start Button */}
 
@@ -552,7 +522,7 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
                 size="lg"
                 onClick={startSession}
                 style={{
-                  backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/START-CHAT.png")',
+                      backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/START-CHAT.png")',
                   backgroundSize: 'cover',  // Ensure the image covers the entire button
                   backgroundPosition: 'center',  // Center the image in the button
                   backgroundRepeat: 'no-repeat',  // Ensure the image doesn't repeat
@@ -578,7 +548,7 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
                       size="lg"
                       onClick={handleTimeoutEndSession}
                       style={{
-                        backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/END-CHAT.png")',
+                   backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/END-CHAT.png")',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',

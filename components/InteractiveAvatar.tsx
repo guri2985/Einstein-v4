@@ -85,7 +85,7 @@ export default function InteractiveAvatar() {
       if (avatarVideo) avatarVideo.style.opacity = "1";
       avatar.current?.on(StreamingEvents.AVATAR_START_TALKING, () => {
         setIsAvatarSpeaking(true);
-        resetInactivityTimer(); 
+       
       });
       avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
         setIsAvatarSpeaking(false);
@@ -107,7 +107,7 @@ export default function InteractiveAvatar() {
           },
         },
         language,
-        disableIdleTimeout: true,
+        disableIdleTimeout: false,
       });
       setData(res);
   
@@ -116,7 +116,7 @@ export default function InteractiveAvatar() {
       await avatar.current.speak({
         text: "Hello, I am your interactive avatar. Let's begin!",
       });
-      resetInactivityTimer();
+    
       setChatMode("voice_mode");
    
   } catch (error) {
@@ -174,18 +174,13 @@ async function handleSpeak() {
     .catch((e) => {
       setDebug(e.message);
     });
-  resetInactivityTimer(); 
+
   setIsLoadingRepeat(false);
 }
 
-let inactivityTimerStart: number | null = null;
-let interruptionOccurred = false;  // Flag to track interruption within 52 seconds
-let inactivityTimeout: ReturnType<typeof setTimeout> | null = null;
-let graceTimeout: ReturnType<typeof setTimeout> | null = null;
-
 const handleUserSpeechStart = () => {
   setIsUserTalking(true);  
-  resetInactivityTimer();  
+
   handleInterrupt(); 
 };
 const handleUserSpeechEnd = () => {
@@ -197,55 +192,11 @@ async function handleInterrupt() {
     setDebug("Avatar API not initialized");
     return;
   }
-
-  if (inactivityTimerStart !== null) {
-    interruptionOccurred = true;
-
-    if (inactivityTimeout) {
-      clearTimeout(inactivityTimeout);
-      inactivityTimeout = null;
-    }
-    if (graceTimeout) {
-      clearTimeout(graceTimeout);
-      graceTimeout = null;
-    }
-    resetInactivityTimer();
-
-    try {
-      await avatar.current.interrupt();
-    } catch (e) {
-      if (e instanceof Error) {
-        setDebug(e.message);
-      } else {
-        setDebug("An unknown error occurred during interruption.");
-      }
-    }
-  } else {
-    console.warn("Inactivity timer has not started yet.");
-  }
 }
 
-const resetInactivityTimer = () => {
-  console.log("🔥 Resetting inactivity timer");
-  if (inactivityTimeout) {
-    clearTimeout(inactivityTimeout);
-    inactivityTimeout = null;
-  }
-  interruptionOccurred = false;
-  inactivityTimeout = setTimeout(() => {
-    if (!isUserTalking && !isAvatarSpeaking) {
-      console.log("🛑 No activity detected. Ending session with GIF transition...");
-      showCloseSessionGif(); 
-      handleTimeoutEndSession();
-    } else {
-      console.log("✅ Activity detected before timeout. Restarting timer.");
-      resetInactivityTimer(); 
-    }
-  }, 41000);
-};
+
 
 const handleTimeoutEndSession = async () => {
-  if (hasEndedRef.current || interruptionOccurred) return;
   showCloseSessionGif(); 
   setButtonsVisible(false);
 
@@ -259,12 +210,19 @@ const handleTimeoutEndSession = async () => {
   endSession(); 
 };
 
+// Event-based ending
+(avatar.current as any)?.on(StreamingEvents.STREAM_DISCONNECTED, () => {
+  showCloseSessionGif();
+  handleTimeoutEndSession();
+});
+
 
 const cleanUpSessionSync = () => {
   try {
+    avatar.current?.stopAvatar();
     avatar.current?.interrupt(); 
     avatar.current?.closeVoiceChat?.();
-    avatar.current?.stopAvatar();
+  
   } catch (e) {
     console.warn("Failed to clean session in beforeunload:", e);
   }
@@ -332,7 +290,7 @@ const mainOneDiv = document.querySelector(".main-one") as HTMLElement | null;
 if (mainOneDiv) {
   setTimeout(() => {
     mainOneDiv.style.opacity = "0"; 
-  }, 2000);
+  }, 1800);
 }
   setTimeout(() => {
     if (gifImage.parentElement) {
@@ -345,7 +303,7 @@ setTimeout(() => {
     mainUpDiv.style.opacity = "1"; 
   }
 }, 0); 
-},4000); 
+},3000); 
 };
 const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
   return new Promise((resolve) => {
@@ -391,7 +349,6 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
   });
 };
     useEffect(() => {
-      // Ensure screensaver video restarts on component mount
       const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
       if (screensaverVideo) {
         screensaverVideo.pause();  
@@ -420,7 +377,6 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
       avatar?.current?.stopListening();
     }
   }, [text, previousText]);
-
 
   useEffect(() => {
     if (stream && mediaStream.current) {
