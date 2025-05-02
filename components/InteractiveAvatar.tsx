@@ -199,15 +199,15 @@ async function handleInterrupt() {
 const handleTimeoutEndSession = async () => {
   showCloseSessionGif(); 
   setButtonsVisible(false);
-
-  await new Promise(resolve => setTimeout(resolve, 800));
+  await new Promise(resolve => setTimeout(resolve, 1200));
   try {
     await avatar.current?.stopAvatar();
   } catch (e) {
     console.warn("Failed to stop avatar:", e);
   }
-  await new Promise(resolve => setTimeout(resolve, 800));
-  endSession(); 
+  endSession();
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  window.location.reload();
 };
 
 // Event-based ending
@@ -290,7 +290,7 @@ const mainOneDiv = document.querySelector(".main-one") as HTMLElement | null;
 if (mainOneDiv) {
   setTimeout(() => {
     mainOneDiv.style.opacity = "0"; 
-  }, 1800);
+  }, 4000);
 }
   setTimeout(() => {
     if (gifImage.parentElement) {
@@ -303,7 +303,7 @@ setTimeout(() => {
     mainUpDiv.style.opacity = "1"; 
   }
 }, 0); 
-},3000); 
+}, 4000); 
 };
 const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
   return new Promise((resolve) => {
