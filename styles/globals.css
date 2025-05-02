@@ -125,5 +125,13 @@ height:100%;
   justify-content: space-around;
 }
 
+.start-btn, .start-btn:hover, .start-btn:active, .start-btn:focus {
+background-color: transparent!important;
 
+}
 
+.transition-transform-colors-opacity {
+  transition-property: none!important;
+  transition-timing-function: ease;
+  transition-duration: inherit;
+}

@@ -417,21 +417,21 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
 
           <video
           id="main-video1"
-          src="https://ounocreatstg.wpenginepowered.com/videos/Samuel Static Loop v1.mp4"
+          src="https://ounocreatstg.wpenginepowered.com/videos/Samuel Static Loop v2.mp4"
           autoPlay
           loop
           muted
           style={{
             position: "absolute",
-            top: "-16px",
+            top: "-39px",
             left: "0",
             width: "100%",
             height: "100%",
             objectFit: "cover",
             opacity: "0", // Initially hidden
             zIndex: "10",
-            maskImage: 'radial-gradient(circle at 48% 10%, transparent 162px, rgb(255, 255, 255) 188px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 48% 10%, transparent 162px, rgb(255, 255, 255) 188px)', 
+            maskImage: 'radial-gradient(circle at 50% 10%, transparent 177px, rgb(255, 255, 255) 210px)', 
+            WebkitMaskImage: 'radial-gradient(circle at 50% 10%, transparent 177px, rgb(255, 255, 255) 210px)', 
           }}
         />
         <video
@@ -466,20 +466,22 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
                 repeatType: "reverse",
               }}
             >
-              <Button 
-                className="w-full text-white bg-main"
-                size="lg"
-                onClick={startSession}
-                style={{
-                      backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/START-CHAT.png")',
-                  backgroundSize: 'cover',  // Ensure the image covers the entire button
-                  backgroundPosition: 'center',  // Center the image in the button
-                  backgroundRepeat: 'no-repeat',  // Ensure the image doesn't repeat
-                  backgroundColor: 'transparent',
-                  width: '260px',
-                  height: '100px',
-                }}
-              />  
+             <Button 
+  className="w-full start-btn focus:outline-none active:outline-none hover:bg-transparent active:bg-transparent"
+  size="lg"
+  onClick={startSession}
+  style={{
+    backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/START-CHAT.png")',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundColor: 'transparent',
+    width: '260px',
+    height: '100px',
+    boxShadow: 'none',
+  }}
+/>
+
             </motion.div>
           ) : isLoadingSession ? (
             <LoadingScreen onComplete={() => setIsLoadingSession(false)} isLoadingSession={isLoadingSession} />
