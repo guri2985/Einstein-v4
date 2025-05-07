@@ -102,7 +102,7 @@ export default function InteractiveAvatar() {
             stability: 1,
             similarity_boost: 1,
             style: 1,
-            use_speaker_boost: false,
+            use_speaker_boost: true,
           },
         },
         language,
