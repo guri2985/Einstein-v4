@@ -64,6 +64,60 @@ export default function InteractiveAvatar() {
     }
     return "";
   }
+  const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
+    return new Promise((resolve) => {
+      const screensaverVideo = document.querySelector(".screensaver-video") as HTMLElement;
+      const gifImage = document.createElement("img");
+      gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif";
+      Object.assign(gifImage.style, {
+        position: "absolute",
+        left: "0",
+        top: "0",
+        width: "100%",
+        height: "100%",
+        opacity: "1",
+        zIndex: "9999",
+        backgroundColor: "transparent",
+      });
+  
+      const mainUpDiv = document.querySelector(".main-up") as HTMLElement;
+      const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
+  
+      if (mainUpDiv) {
+        mainUpDiv.appendChild(gifImage);
+      }
+  
+      setTimeout(() => {
+        if (screensaverVideo) {
+          screensaverVideo.style.display = "none";
+        }
+        showLoaderCallback();
+      }, 2000);
+  
+      gifImage.onload = () => {
+        setTimeout(() => {
+          gifImage.remove();
+          // ✅ Show main-one after transition ends
+          if (mainOneDiv) {
+            mainOneDiv.style.opacity = "1";
+          }
+          resolve();
+        }, 4000);
+      };
+  
+      gifImage.onerror = () => {
+        gifImage.remove();
+        if (screensaverVideo) {
+          screensaverVideo.style.display = "none";
+        }
+        // ✅ Show main-one even if GIF fails to load
+        if (mainOneDiv) {
+          mainOneDiv.style.opacity = "1";
+        }
+        resolve();
+      };
+    });
+  };
   const startSession = async () => {
     setSessionEnded(false);
     hasEndedRef.current = false;
@@ -151,7 +205,7 @@ const startSessionTransition = () => {
     const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement;
     if (mainOneDiv) mainOneDiv.style.opacity = "1"; 
     if (videoBackground) videoBackground.style.opacity = "1"; 
-  }, 0);
+  }, 500);
 
   setTimeout(() => {
     if (gifImage.parentElement) {
@@ -298,60 +352,7 @@ setTimeout(() => {
 }, 4000); 
 };
 
-const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
-  return new Promise((resolve) => {
-    const screensaverVideo = document.querySelector(".screensaver-video") as HTMLElement;
-    const gifImage = document.createElement("img");
-    gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif";
-    Object.assign(gifImage.style, {
-      position: "absolute",
-      left: "0",
-      top: "0",
-      width: "100%",
-      height: "100%",
-      opacity: "1",
-      zIndex: "9999",
-      backgroundColor: "transparent",
-    });
 
-    const mainUpDiv = document.querySelector(".main-up") as HTMLElement;
-    const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
-
-    if (mainUpDiv) {
-      mainUpDiv.appendChild(gifImage);
-    }
-
-    setTimeout(() => {
-      if (screensaverVideo) {
-        screensaverVideo.style.display = "none";
-      }
-      showLoaderCallback();
-    }, 2000);
-
-    gifImage.onload = () => {
-      setTimeout(() => {
-        gifImage.remove();
-        // ✅ Show main-one after transition ends
-        if (mainOneDiv) {
-          mainOneDiv.style.opacity = "1";
-        }
-        resolve();
-      }, 4000);
-    };
-
-    gifImage.onerror = () => {
-      gifImage.remove();
-      if (screensaverVideo) {
-        screensaverVideo.style.display = "none";
-      }
-      // ✅ Show main-one even if GIF fails to load
-      if (mainOneDiv) {
-        mainOneDiv.style.opacity = "1";
-      }
-      resolve();
-    };
-  });
-};
 
 
     useEffect(() => {
