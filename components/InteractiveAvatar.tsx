@@ -78,17 +78,17 @@ export default function InteractiveAvatar() {
     avatar.current?.on(StreamingEvents.STREAM_READY, (event) => {
       console.log(">>>>> Stream ready:", event.detail);
       setStream(event.detail);
-      setTimeout(() => {
-      setMaskVisible(true);
-        const avatarVideo = document.querySelector(".avatar-stream") as HTMLElement;
-        if (avatarVideo) avatarVideo.style.opacity = "1";
-        avatar.current?.on(StreamingEvents.AVATAR_START_TALKING, () => {
-          setIsAvatarSpeaking(true);
-        });
-        avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
-          setIsAvatarSpeaking(false);
-        });
-      }, 1500);
+      setTimeout(() => setMaskVisible(true), 0);
+    
+      const avatarVideo = document.querySelector(".avatar-stream") as HTMLElement;
+      if (avatarVideo) avatarVideo.style.opacity = "1";
+      avatar.current?.on(StreamingEvents.AVATAR_START_TALKING, () => {
+        setIsAvatarSpeaking(true);
+       
+      });
+      avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
+        setIsAvatarSpeaking(false);
+      });
     });
     try {
       const res = await avatar.current.createStartAvatar({
@@ -101,7 +101,8 @@ export default function InteractiveAvatar() {
           elevenlabsSettings: {
             stability: 1,
             similarity_boost: 1,
-            use_speaker_boost: true,
+            style: 1,
+            use_speaker_boost: false,
           },
         },
         language,
@@ -150,7 +151,7 @@ const startSessionTransition = () => {
     const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement;
     if (mainOneDiv) mainOneDiv.style.opacity = "1"; 
     if (videoBackground) videoBackground.style.opacity = "1"; 
-  }, 500);
+  }, 0);
 
   setTimeout(() => {
     if (gifImage.parentElement) {
@@ -199,7 +200,7 @@ const handleTimeoutEndSession = async () => {
     console.warn("Failed to stop avatar:", e);
   }
   endSession();
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise(resolve => setTimeout(resolve, 1000));
   window.location.reload();
 };
 
@@ -434,8 +435,8 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
             objectFit: "cover",
             opacity: "0", // Initially hidden
             zIndex: "10",
-            maskImage: 'radial-gradient(circle at 51% 13%, transparent 173px, rgb(255, 255, 255) 217px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 51% 13%, transparent 173px, rgb(255, 255, 255) 217px)', 
+            maskImage: 'radial-gradient(circle at 46% 10%, transparent 173px, rgb(255, 255, 255) 217px)', 
+            WebkitMaskImage: 'radial-gradient(circle at 46% 10%, transparent 173px, rgb(255, 255, 255) 217px)', 
           }}
         />
         <video
