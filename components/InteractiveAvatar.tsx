@@ -151,7 +151,7 @@ export default function InteractiveAvatar() {
         knowledgeId,
         voice: {
           rate: 1,
-          emotion: VoiceEmotion.SOOTHING,
+          emotion: VoiceEmotion.EXCITED,
           elevenlabsSettings: {
             stability: 1,
             similarity_boost: 1,
