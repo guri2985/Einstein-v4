@@ -205,7 +205,7 @@ const startSessionTransition = () => {
     const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement;
     if (mainOneDiv) mainOneDiv.style.opacity = "1"; 
     if (videoBackground) videoBackground.style.opacity = "1"; 
-  }, 500);
+  }, 0);
 
   setTimeout(() => {
     if (gifImage.parentElement) {
