@@ -142,7 +142,7 @@ export default function InteractiveAvatar() {
         avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
           setIsAvatarSpeaking(false);
         });
-      }, 500);
+      }, 1500);
     });
     try {
       const res = await avatar.current.createStartAvatar({
@@ -254,7 +254,7 @@ const handleTimeoutEndSession = async () => {
     console.warn("Failed to stop avatar:", e);
   }
   endSession();
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise(resolve => setTimeout(resolve, 300));
   window.location.reload();
 };
 
