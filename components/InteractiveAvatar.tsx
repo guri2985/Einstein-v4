@@ -451,8 +451,8 @@ setTimeout(() => {
             objectFit: "cover",
             opacity: "0", // Initially hidden
             zIndex: "10",
-            maskImage: 'radial-gradient(circle at 46% 10%, transparent 173px, rgb(255, 255, 255) 217px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 46% 10%, transparent 173px, rgb(255, 255, 255) 217px)', 
+            maskImage: 'radial-gradient(circle at 51% 13%, transparent 173px, rgb(255, 255, 255) 217px)', 
+            WebkitMaskImage: 'radial-gradient(circle at 51% 13%, transparent 173px, rgb(255, 255, 255) 217px)', 
           }}
         />
         <video
