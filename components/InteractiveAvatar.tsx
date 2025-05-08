@@ -153,9 +153,9 @@ export default function InteractiveAvatar() {
           rate: 1,
           emotion: VoiceEmotion.EXCITED,
           elevenlabsSettings: {
-            stability: 1,
-            similarity_boost: 1,
-            style: 1,
+            stability: 0.6,
+            similarity_boost: 0.6,
+            style: 0,
             use_speaker_boost: true,
           },
         },
