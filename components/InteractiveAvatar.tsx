@@ -132,17 +132,17 @@ export default function InteractiveAvatar() {
     avatar.current?.on(StreamingEvents.STREAM_READY, (event) => {
       console.log(">>>>> Stream ready:", event.detail);
       setStream(event.detail);
-      setTimeout(() => setMaskVisible(true), 0);
-    
-      const avatarVideo = document.querySelector(".avatar-stream") as HTMLElement;
-      if (avatarVideo) avatarVideo.style.opacity = "1";
-      avatar.current?.on(StreamingEvents.AVATAR_START_TALKING, () => {
-        setIsAvatarSpeaking(true);
-       
-      });
-      avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
-        setIsAvatarSpeaking(false);
-      });
+      setTimeout(() => {
+      setMaskVisible(true);
+        const avatarVideo = document.querySelector(".avatar-stream") as HTMLElement;
+        if (avatarVideo) avatarVideo.style.opacity = "1";
+        avatar.current?.on(StreamingEvents.AVATAR_START_TALKING, () => {
+          setIsAvatarSpeaking(true);
+        });
+        avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
+          setIsAvatarSpeaking(false);
+        });
+      }, 500);
     });
     try {
       const res = await avatar.current.createStartAvatar({
@@ -205,7 +205,7 @@ const startSessionTransition = () => {
     const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement;
     if (mainOneDiv) mainOneDiv.style.opacity = "1"; 
     if (videoBackground) videoBackground.style.opacity = "1"; 
-  }, 0);
+  }, 500);
 
   setTimeout(() => {
     if (gifImage.parentElement) {
