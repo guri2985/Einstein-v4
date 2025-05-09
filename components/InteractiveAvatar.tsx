@@ -150,11 +150,11 @@ export default function InteractiveAvatar() {
           avatarName: "5da1806dea054b19a7a47647ccdf102b",
         knowledgeId,
         voice: {
-          rate: 1.5,
-          emotion: VoiceEmotion.FRIENDLY,
+          rate: 1.2,
+          emotion: VoiceEmotion.EXCITED,
           elevenlabsSettings: {
             stability: 0.75,
-            similarity_boost: 0.75,
+            similarity_boost: 1,
             style: 0.75,
             use_speaker_boost: true,
           },
