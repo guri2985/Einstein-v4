@@ -46,7 +46,6 @@ export default function InteractiveAvatar() {
   const hasEndedRef = useRef(false);
   const [countdownVisible, setCountdownVisible] = useState(false);
   const [isAvatarSpeaking, setIsAvatarSpeaking] = useState(false);
- 
 
   function baseApiUrl() {
     return process.env.NEXT_PUBLIC_BASE_API_URL;
@@ -64,6 +63,59 @@ export default function InteractiveAvatar() {
     }
     return "";
   }
+
+  const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
+    return new Promise((resolve) => {
+      const screensaverVideo = document.querySelector(".screensaver-video") as HTMLElement;
+      const gifImage = document.createElement("img");
+      gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif";
+      Object.assign(gifImage.style, {
+        position: "absolute",
+        left: "0",
+        top: "0",
+        width: "100%",
+        height: "100%",
+        opacity: "1",
+        zIndex: "9999",
+        backgroundColor: "transparent",
+      });
+  
+      const mainUpDiv = document.querySelector(".main-up") as HTMLElement;
+      const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
+  
+      if (mainUpDiv) {
+        mainUpDiv.appendChild(gifImage);
+      }
+  
+      setTimeout(() => {
+        if (screensaverVideo) {
+          screensaverVideo.style.display = "none";
+        }
+        showLoaderCallback();
+      }, 2000);
+  
+      gifImage.onload = () => {
+        setTimeout(() => {
+          gifImage.remove();
+          if (mainOneDiv) {
+            mainOneDiv.style.opacity = "1";
+          }
+          resolve();
+        }, 4000);
+      };
+      gifImage.onerror = () => {
+        gifImage.remove();
+        if (screensaverVideo) {
+          screensaverVideo.style.display = "none";
+        }
+        if (mainOneDiv) {
+          mainOneDiv.style.opacity = "1";
+        }
+        resolve();
+      };
+    });
+  };
+
   const startSession = async () => {
     setSessionEnded(false);
     hasEndedRef.current = false;
@@ -78,22 +130,24 @@ export default function InteractiveAvatar() {
     avatar.current?.on(StreamingEvents.STREAM_READY, (event) => {
       console.log(">>>>> Stream ready:", event.detail);
       setStream(event.detail);
-      setTimeout(() => setMaskVisible(true), 0);
-    
-      const avatarVideo = document.querySelector(".avatar-stream") as HTMLElement;
-      if (avatarVideo) avatarVideo.style.opacity = "1";
-      avatar.current?.on(StreamingEvents.AVATAR_START_TALKING, () => {
-        setIsAvatarSpeaking(true);
-       
-      });
-      avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
-        setIsAvatarSpeaking(false);
-      });
+      setTimeout(() => {
+      setMaskVisible(true);
+        const avatarVideo = document.querySelector(".avatar-stream") as HTMLElement;
+        if (avatarVideo) avatarVideo.style.opacity = "1";
+        avatar.current?.on(StreamingEvents.AVATAR_START_TALKING, () => {
+          setIsAvatarSpeaking(true);
+        });
+        avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
+          setIsAvatarSpeaking(false);
+        });
+      }, 1500);
     });
+    
+
     try {
       const res = await avatar.current.createStartAvatar({
         quality: AvatarQuality.High,
-        avatarName: "5da1806dea054b19a7a47647ccdf102b",
+          avatarName: "5da1806dea054b19a7a47647ccdf102b",
         knowledgeId,
         voice: {
           rate: 1,
@@ -102,7 +156,7 @@ export default function InteractiveAvatar() {
             stability: 1,
             similarity_boost: 1,
             style: 1,
-            use_speaker_boost: false,
+            use_speaker_boost: true,
           },
         },
         language,
@@ -125,13 +179,12 @@ export default function InteractiveAvatar() {
   }
   startSessionTransition();
 };
+
   let isGifLoaded = false; 
  
 const startSessionTransition = () => {
   if (isGifLoaded) return;
   isGifLoaded = true; 
-
-  // Create the GIF image for transition
   const gifImage = document.createElement("img");
   gifImage.src = "https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/pixels_once.gif"; 
   gifImage.style.position = "absolute";
@@ -151,7 +204,7 @@ const startSessionTransition = () => {
     const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement;
     if (mainOneDiv) mainOneDiv.style.opacity = "1"; 
     if (videoBackground) videoBackground.style.opacity = "1"; 
-  }, 0);
+  }, 500);
 
   setTimeout(() => {
     if (gifImage.parentElement) {
@@ -160,6 +213,7 @@ const startSessionTransition = () => {
     setButtonsVisible(true); 
   }, 2000);
 };
+
 async function handleSpeak() {
   setIsLoadingRepeat(true);
   if (!avatar.current) {
@@ -200,15 +254,12 @@ const handleTimeoutEndSession = async () => {
     console.warn("Failed to stop avatar:", e);
   }
   endSession();
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise(resolve => setTimeout(resolve, 300));
   window.location.reload();
 };
-
 (avatar.current as any)?.on(StreamingEvents.STREAM_DISCONNECTED, () => {
   handleTimeoutEndSession(); 
 });
-
-
 const cleanUpSessionSync = () => {
   try {
     avatar.current?.stopAvatar();
@@ -297,48 +348,7 @@ setTimeout(() => {
 }, 0); 
 }, 4000); 
 };
-const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
-  return new Promise((resolve) => {
-    const screensaverVideo = document.querySelector(".screensaver-video") as HTMLElement;
-    const gifImage = document.createElement("img");
-    gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif";
-    Object.assign(gifImage.style, {
-      position: "absolute",
-      left: "0",
-      top: "0",
-      width: "100%",
-      height: "100%",
-      opacity: "1",
-      zIndex: "9999",
-      backgroundColor: "transparent",
-    });
 
-    const mainUpDiv = document.querySelector(".main-up") as HTMLElement;
-    if (mainUpDiv) {
-      mainUpDiv.appendChild(gifImage);
-    }
-
-    setTimeout(() => {
-      if (screensaverVideo) {
-        screensaverVideo.style.display = "none";
-      }
-      showLoaderCallback();
-    }, 2000);
-    gifImage.onload = () => {
-      setTimeout(() => {
-        gifImage.remove();
-        resolve();
-      }, 4000);
-    };
-    gifImage.onerror = () => {
-      gifImage.remove();
-      if (screensaverVideo) {
-        screensaverVideo.style.display = "none";
-      }
-      resolve();
-    };
-  });
-};
     useEffect(() => {
       const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
       if (screensaverVideo) {

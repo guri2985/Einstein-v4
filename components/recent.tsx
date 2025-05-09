@@ -90,6 +90,7 @@ export default function InteractiveAvatar() {
         setIsAvatarSpeaking(false);
       });
     });
+    
     try {
       const res = await avatar.current.createStartAvatar({
         quality: AvatarQuality.High,
