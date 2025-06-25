@@ -1,6 +1,7 @@
 import "@/styles/globals.css";
 import clsx from "clsx";
 import { Metadata, Viewport } from "next";
+import Script from "next/script"; // ✅ Import Next.js Script
 
 import { Providers } from "./providers";
 
@@ -20,7 +21,7 @@ const fontMono = FontMono({
 export const metadata: Metadata = {
   title: {
     default: "Samuel Cunard ",
-    template: `%s - HeyGen Interactive Avatar`,
+    template: `%s - Interactive Avatar`,
   },
  
 };
@@ -45,6 +46,20 @@ export default function RootLayout({
     >
       <head />
       <body className={clsx("mainb")}>
+        <Script id="disable-shortcuts" strategy="afterInteractive">
+          {`
+            document.addEventListener("contextmenu", (e) => e.preventDefault());
+            document.addEventListener("keydown", (e) => {
+              if (
+                e.key === "F12" ||
+                (e.ctrlKey && e.shiftKey && e.key === "I") ||
+                (e.ctrlKey && e.key === "U")
+              ) {
+                e.preventDefault();
+              }
+            });
+          `}
+        </Script>
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           <main className="relative flex flex-col ">
            
