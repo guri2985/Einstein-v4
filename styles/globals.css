@@ -140,3 +140,8 @@ opacity:1!important;
   --tw-text-opacity: 0!important;
   color: transparent!important;
 }
+
+video{
+pointer-events: none;
+
+}
