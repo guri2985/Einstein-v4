@@ -68,7 +68,7 @@ export default function InteractiveAvatar() {
     return new Promise((resolve) => {
       const screensaverVideo = document.querySelector(".screensaver-video") as HTMLElement;
       const gifImage = document.createElement("img");
-      gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif";
+      gifImage.src = "https://ouno.co.uk/Avatar/Transitions.gif";
       Object.assign(gifImage.style, {
         position: "absolute",
         left: "0",
@@ -186,7 +186,7 @@ const startSessionTransition = () => {
   if (isGifLoaded) return;
   isGifLoaded = true; 
   const gifImage = document.createElement("img");
-  gifImage.src = "https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/pixels_once.gif"; 
+  gifImage.src = "https://ouno.co.uk/Avatar/pixels_once.gif"; 
   gifImage.style.position = "absolute";
   gifImage.style.left = "0";
   gifImage.style.width = "100%";
@@ -317,7 +317,7 @@ const endSession = async () => {
 };
 const showCloseSessionGif = () => {
   const gifImage = document.createElement("img");
-  gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif";
+  gifImage.src = "https://ouno.co.uk/Avatar/Transitions.gif";
   gifImage.style.position = "absolute";
   gifImage.style.left = "0";
   gifImage.style.width = "100%";
@@ -405,7 +405,7 @@ setTimeout(() => {
             width: "100%", }}>
         <video
           className="screensaver-video"
-          src="https://ounocreatstg.wpenginepowered.com/videos/Samuel Screensaver3.mp4"
+          src="https://ouno.co.uk/Avatar/Samuel-sreensaver.mp4"
           autoPlay
           loop
           muted
@@ -432,7 +432,7 @@ setTimeout(() => {
 
           <video
           id="main-video1"
-          src="https://ounocreatstg.wpenginepowered.com/videos/Samuel Static Loop v2.mp4"
+          src="https://ouno.co.uk/Avatar/Samuel.mp4"
           autoPlay
           loop
           muted
@@ -486,7 +486,7 @@ setTimeout(() => {
   size="lg"
   onClick={startSession}
   style={{
-    backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/START-CHAT.png")',
+    backgroundImage: 'url("https://ouno.co.uk/Avatar/START-CHAT.png")',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
@@ -515,7 +515,7 @@ setTimeout(() => {
                       size="lg"
                       onClick={handleTimeoutEndSession}
                       style={{
-                   backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/END-CHAT.png")',
+                   backgroundImage: 'url("https://ouno.co.uk/Avatar/END-CHAT.png")',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',
@@ -526,7 +526,7 @@ setTimeout(() => {
                     />
                    {countdownVisible && (
   <img className="counter"
-    src="https://ounocreatstg.wpenginepowered.com/videos/counter.gif"
+    src="https://ouno.co.uk/Avatar/counter.gif"
     alt="Countdown Timer"
     style={{
       position: "absolute",
