@@ -147,7 +147,7 @@ export default function InteractiveAvatar() {
     try {
       const res = await avatar.current.createStartAvatar({
         quality: AvatarQuality.High,
-          avatarName: "5da1806dea054b19a7a47647ccdf102b",
+          avatarName: "3c948ea847c94dd98e4fe62e4a605ec0",
         knowledgeId,
         voice: {
           rate: 1,
@@ -405,7 +405,7 @@ setTimeout(() => {
             width: "100%", }}>
         <video
           className="screensaver-video"
-          src="https://ouno.co.uk/Avatar/Samuel-sreensaver.mp4"
+          src="https://ouno.co.uk/Avatar/EINSTEIN-SCREENSAVER.mp4"
           autoPlay
           loop
           muted
@@ -432,21 +432,21 @@ setTimeout(() => {
 
           <video
           id="main-video1"
-          src="https://ouno.co.uk/Avatar/Samuel.mp4"
+          src="https://ouno.co.uk/Avatar/EINSTEIN.mp4"
           autoPlay
           loop
           muted
           style={{
             position: "absolute",
-            top: "-40px",
+            top: "0",
             left: "0",
             width: "100%",
             height: "100%",
             objectFit: "cover",
             opacity: "0", // Initially hidden
             zIndex: "10",
-            maskImage: 'radial-gradient(circle at 51% 13%, transparent 173px, rgb(255, 255, 255) 217px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 51% 13%, transparent 173px, rgb(255, 255, 255) 217px)', 
+            maskImage: 'radial-gradient(circle at 48% 14%, transparent 165px, rgb(255, 255, 255) 207px)', 
+            WebkitMaskImage: 'radial-gradient(circle at 48% 14%, transparent 165px, rgb(255, 255, 255) 207px)', 
           }}
         />
         <video
@@ -457,10 +457,11 @@ setTimeout(() => {
           style={{
             objectFit: "contain",
             position: "absolute",
-            top: "300px",
+            top: "302px",
             left: "50%",
             transform: "translate(-50%, -50%)",  // Centers the avatar on the screen
             width: "1100px",
+            opacity: 1,
           }}
         />
       </div>
@@ -486,14 +487,15 @@ setTimeout(() => {
   size="lg"
   onClick={startSession}
   style={{
-    backgroundImage: 'url("https://ouno.co.uk/Avatar/START-CHAT.png")',
+    backgroundImage: 'url("https://ouno.co.uk/wp-content/uploads/2025/08/START-CHAT.png")',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
     backgroundColor: 'transparent',
-    width: '260px',
-    height: '100px',
+    width: '180px',
+    height: '180px',
     boxShadow: 'none',
+    marginRight:'30px',
   }}
 />
 
@@ -515,13 +517,14 @@ setTimeout(() => {
                       size="lg"
                       onClick={handleTimeoutEndSession}
                       style={{
-                   backgroundImage: 'url("https://ouno.co.uk/Avatar/END-CHAT.png")',
+                   backgroundImage: 'url("https://ouno.co.uk/wp-content/uploads/2025/08/END-CHAT.png")',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',
                         backgroundColor: 'transparent',
-                        width: '260px',
-                        height: '100px',
+                        width: '180px',
+                        height: '180px',
+                         marginRight:'30px',
                       }}
                     />
                    {countdownVisible && (
