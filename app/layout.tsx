@@ -20,7 +20,7 @@ const fontMono = FontMono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Samuel Cunard ",
+    default: "Albert Einstein ",
     template: `%s - Interactive Avatar`,
   },
  
