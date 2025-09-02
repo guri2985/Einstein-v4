@@ -1,5 +1,6 @@
 import type { StartAvatarResponse } from "@heygen/streaming-avatar";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import StreamingAvatar, {
   AvatarQuality,
   StreamingEvents,
@@ -66,9 +67,9 @@ export default function InteractiveAvatar() {
 
   const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
     return new Promise((resolve) => {
-      const screensaverVideo = document.querySelector(".screensaver-video") as HTMLElement;
+     const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement | null;
       const gifImage = document.createElement("img");
-      gifImage.src = "https://ouno.co.uk/Avatar/Transitions.gif";
+      gifImage.src = "/images/Transitions.gif";
       Object.assign(gifImage.style, {
         position: "absolute",
         left: "0",
@@ -87,12 +88,14 @@ export default function InteractiveAvatar() {
         mainUpDiv.appendChild(gifImage);
       }
   
-      setTimeout(() => {
-        if (screensaverVideo) {
-          screensaverVideo.style.display = "none";
-        }
-        showLoaderCallback();
-      }, 2000);
+    setTimeout(() => {
+  if (screensaverVideo) {
+    screensaverVideo.pause();       // stop both video and audio
+    screensaverVideo.currentTime = 0; // optional: reset to start
+    screensaverVideo.style.display = "none";
+  }
+  showLoaderCallback();
+}, 2000);
   
       gifImage.onload = () => {
         setTimeout(() => {
@@ -186,7 +189,7 @@ const startSessionTransition = () => {
   if (isGifLoaded) return;
   isGifLoaded = true; 
   const gifImage = document.createElement("img");
-  gifImage.src = "https://ouno.co.uk/Avatar/pixels_once.gif"; 
+  gifImage.src = "/images/pixels_once.gif"; 
   gifImage.style.position = "absolute";
   gifImage.style.left = "0";
   gifImage.style.width = "100%";
@@ -204,7 +207,7 @@ const startSessionTransition = () => {
     const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement;
     if (mainOneDiv) mainOneDiv.style.opacity = "1"; 
     if (videoBackground) videoBackground.style.opacity = "1"; 
-  }, 500);
+  }, 0);
 
   setTimeout(() => {
     if (gifImage.parentElement) {
@@ -317,7 +320,7 @@ const endSession = async () => {
 };
 const showCloseSessionGif = () => {
   const gifImage = document.createElement("img");
-  gifImage.src = "https://ouno.co.uk/Avatar/Transitions.gif";
+  gifImage.src = "/images/Transitions.gif";
   gifImage.style.position = "absolute";
   gifImage.style.left = "0";
   gifImage.style.width = "100%";
@@ -397,28 +400,23 @@ setTimeout(() => {
 
   return (
     <div className="main-wrapper" style={{ position: "relative" }}>
-      
-      {/* Default screensaver video */}
-      <div className="main-up" style={{ height: "100%",  position: "absolute",
+     <div className="main-up" style={{ height: "100%",  position: "absolute",
             top: "0",
             left: "0",
             width: "100%", }}>
         <video
           className="screensaver-video"
-          src="https://ouno.co.uk/Avatar/EINSTEIN-SCREENSAVER.mp4"
+          src="https://ouno.co.uk/Avatar/e-screen.mp4"
           autoPlay
           loop
-          muted
           style={{
-           
-            height: "100%",
+           height: "100%",
             objectFit: "cover",
             opacity: "1",
             transition: "opacity 1s ease-in-out",
           }}
         />
-        
-        {/* Append loader inside .main-up */}
+  
         {isLoadingSession && (
           <LoadingScreen
             onComplete={() => setIsLoadingSession(false)}
@@ -427,12 +425,10 @@ setTimeout(() => {
         )}
       </div>
   
-      {/* Avatar video and new background */}
       <div className="main-one" style={{ opacity: "0", transition: "opacity 0s ease-in-out" }}>
-
-          <video
+        <video
           id="main-video1"
-          src="https://ouno.co.uk/Avatar/EINSTEIN.mp4"
+          src="https://ouno.co.uk/Avatar/e-video.mp4"
           autoPlay
           loop
           muted
@@ -443,13 +439,15 @@ setTimeout(() => {
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            opacity: "0", // Initially hidden
+            opacity: "0",
             zIndex: "10",
-            maskImage: 'radial-gradient(circle at 48% 14%, transparent 165px, rgb(255, 255, 255) 207px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 48% 14%, transparent 165px, rgb(255, 255, 255) 207px)', 
+         maskImage: 'radial-gradient(circle at 51% 14%, transparent 165px, rgb(255, 255, 255) 218px)', 
+                    WebkitMaskImage: 'radial-gradient(circle at 51% 14%, transparent 165px, rgb(255, 255, 255) 218px)', 
           }}
         />
-        <video
+
+
+<video
           ref={mediaStream}
           autoPlay
           playsInline
@@ -459,21 +457,18 @@ setTimeout(() => {
             position: "absolute",
             top: "302px",
             left: "50%",
-            transform: "translate(-50%, -50%)",  // Centers the avatar on the screen
+            transform: "translate(-50%, -50%)",  
             width: "1100px",
+             height: "607px",
             opacity: 1,
           }}
         />
       </div>
-     
-  
-      {/* Session Start Button */}
-
-      <Card>
+ <Card>
         <CardBody>
           {!stream && !isLoadingSession ? (
             <motion.div
-              initial={{ scale: 1, opacity: 1 }}  // Start at normal size
+              initial={{ scale: 1, opacity: 1 }} 
               animate={{ scale: [1, 1.03, 1], opacity: 1 }} 
               transition={{
                 duration: 1,
@@ -487,7 +482,7 @@ setTimeout(() => {
   size="lg"
   onClick={startSession}
   style={{
-    backgroundImage: 'url("https://ouno.co.uk/wp-content/uploads/2025/08/START-CHAT.png")',
+    backgroundImage: 'url("/images/start-chat.png")',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
@@ -517,7 +512,7 @@ setTimeout(() => {
                       size="lg"
                       onClick={handleTimeoutEndSession}
                       style={{
-                   backgroundImage: 'url("https://ouno.co.uk/wp-content/uploads/2025/08/END-CHAT.png")',
+                   backgroundImage: 'url("/images/end-chat.png")',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',
@@ -529,7 +524,7 @@ setTimeout(() => {
                     />
                    {countdownVisible && (
   <img className="counter"
-    src="https://ouno.co.uk/Avatar/counter.gif"
+    src="/images/counter.gif"
     alt="Countdown Timer"
     style={{
       position: "absolute",
