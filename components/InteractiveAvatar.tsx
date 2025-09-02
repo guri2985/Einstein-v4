@@ -189,7 +189,7 @@ const startSessionTransition = () => {
   if (isGifLoaded) return;
   isGifLoaded = true; 
   const gifImage = document.createElement("img");
-  gifImage.src = "/images/pixels_once.gif"; 
+  gifImage.src = "https://ouno.co.uk/wp-content/uploads/2025/09/pixels_once.gif"; 
   gifImage.style.position = "absolute";
   gifImage.style.left = "0";
   gifImage.style.width = "100%";
@@ -320,7 +320,7 @@ const endSession = async () => {
 };
 const showCloseSessionGif = () => {
   const gifImage = document.createElement("img");
-  gifImage.src = "/images/Transitions.gif";
+  gifImage.src = "https://ouno.co.uk/wp-content/uploads/2025/09/Transitions.gif";
   gifImage.style.position = "absolute";
   gifImage.style.left = "0";
   gifImage.style.width = "100%";
@@ -409,6 +409,7 @@ setTimeout(() => {
           src="https://ouno.co.uk/Avatar/e-screen.mp4"
           autoPlay
           loop
+          muted
           style={{
            height: "100%",
             objectFit: "cover",
@@ -441,8 +442,8 @@ setTimeout(() => {
             objectFit: "cover",
             opacity: "0",
             zIndex: "10",
-            maskImage: 'radial-gradient(circle at 51% 14%, transparent 165px, rgb(255, 255, 255) 218px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 51% 14%, transparent 165px, rgb(255, 255, 255) 218px)', 
+            maskImage: 'radial-gradient(circle at 48% 14%, transparent 165px, rgb(255, 255, 255) 218px)', 
+            WebkitMaskImage: 'radial-gradient(circle at 48% 14%, transparent 165px, rgb(255, 255, 255) 218px)', 
           }}
         />
 
@@ -482,7 +483,7 @@ setTimeout(() => {
   size="lg"
   onClick={startSession}
   style={{
-    backgroundImage: 'url("https://ouno.co.uk/Avatar/start.png")',
+    backgroundImage: 'url("https://ouno.co.uk/wp-content/uploads/2025/09/start-chat.png")',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
@@ -512,7 +513,7 @@ setTimeout(() => {
                       size="lg"
                       onClick={handleTimeoutEndSession}
                       style={{
-                   backgroundImage: 'url("https://ouno.co.uk/Avatar/end.png")',
+                   backgroundImage: 'url("https://ouno.co.uk/wp-content/uploads/2025/09/end-chat.png")',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',
