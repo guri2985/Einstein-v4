@@ -43,7 +43,7 @@ export default function LoadingScreen({ onComplete, isLoadingSession }: LoadingS
    
       <div className="flex flex-col items-center justify-center space-y-4">
         <img 
-          src="/images/initial.png"
+          src="https://ouno.co.uk/Avatar/Initialising.png"
           alt="Initializing..."
           className="w-[500px] h-auto"
         />
