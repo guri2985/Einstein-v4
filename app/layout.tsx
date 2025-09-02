@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
 import clsx from "clsx";
 import { Metadata, Viewport } from "next";
-import Script from "next/script"; // ✅ Import Next.js Script
+import Script from "next/script"; 
 
 import { Providers } from "./providers";
 
