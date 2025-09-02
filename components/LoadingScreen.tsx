@@ -37,20 +37,18 @@ export default function LoadingScreen({ onComplete, isLoadingSession }: LoadingS
         height: '1920px',
         left: '50%',
         top: '50%',
-        transform: 'translate(-50%, -50%)', // Center the loading screen
+        transform: 'translate(-50%, -50%)', 
       }}
     >
-      {/* Flex container to stack image and progress bar vertically */}
+   
       <div className="flex flex-col items-center justify-center space-y-4">
-        {/* Image above the progress bar */}
         <img 
-          src="https://ouno.co.uk/wp-content/uploads/2025/08/INITIALISING.png"
+          src="https://ouno.co.uk/Avatar/Initialising.png"
           alt="Initializing..."
           className="w-[500px] h-auto"
         />
 
-        {/* Progress Bar */}
-        <div className="w-[450px] h-5 bg-gray-300 rounded-full overflow-hidden meter relative">
+    <div className="w-[450px] h-5 bg-gray-300 rounded-full overflow-hidden meter relative">
           <div
             className="h-full bg-[a1915e] 500 transition-all duration-200 ease-in-out relative"
             style={{
