@@ -482,7 +482,7 @@ setTimeout(() => {
   size="lg"
   onClick={startSession}
   style={{
-    backgroundImage: 'url("/images/start-chat.png")',
+    backgroundImage: 'url("https://ouno.co.uk/Avatar/start.png")',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
@@ -512,7 +512,7 @@ setTimeout(() => {
                       size="lg"
                       onClick={handleTimeoutEndSession}
                       style={{
-                   backgroundImage: 'url("/images/end-chat.png")',
+                   backgroundImage: 'url("https://ouno.co.uk/Avatar/end.png")',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',
