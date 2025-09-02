@@ -150,7 +150,7 @@ export default function InteractiveAvatar() {
     try {
       const res = await avatar.current.createStartAvatar({
         quality: AvatarQuality.High,
-          avatarName: "3c948ea847c94dd98e4fe62e4a605ec0",
+          avatarName: "0e20a06e906045c0b88c78b98fcb4c4c",
         knowledgeId,
         voice: {
           rate: 1,
@@ -441,8 +441,8 @@ setTimeout(() => {
             objectFit: "cover",
             opacity: "0",
             zIndex: "10",
-            maskImage: 'radial-gradient(circle at 51% 14%, transparent 165px, rgb(255, 255, 255) 218px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 51% 14%, transparent 165px, rgb(255, 255, 255) 218px)', 
+            maskImage: 'radial-gradient(circle at 48% 14%, transparent 165px, rgb(255, 255, 255) 218px)', 
+            WebkitMaskImage: 'radial-gradient(circle at 48% 14%, transparent 165px, rgb(255, 255, 255) 218px)', 
           }}
         />
 
