@@ -406,7 +406,7 @@ setTimeout(() => {
             width: "100%", }}>
         <video
           className="screensaver-video"
-          src="/videos/screen-saver.mp4"
+          src="https://ouno.co.uk/Avatar/e-screen.mp4"
           autoPlay
           loop
           style={{
@@ -428,7 +428,7 @@ setTimeout(() => {
       <div className="main-one" style={{ opacity: "0", transition: "opacity 0s ease-in-out" }}>
         <video
           id="main-video1"
-          src="/videos/static-video.mp4"
+          src="https://ouno.co.uk/Avatar/e-video.mp4"
           autoPlay
           loop
           muted
@@ -441,8 +441,8 @@ setTimeout(() => {
             objectFit: "cover",
             opacity: "0",
             zIndex: "10",
-            maskImage: 'radial-gradient(circle at 48% 14%, transparent 165px, rgb(255, 255, 255) 207px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 48% 14%, transparent 165px, rgb(255, 255, 255) 207px)', 
+         maskImage: 'radial-gradient(circle at 51% 14%, transparent 165px, rgb(255, 255, 255) 218px)', 
+                    WebkitMaskImage: 'radial-gradient(circle at 51% 14%, transparent 165px, rgb(255, 255, 255) 218px)', 
           }}
         />
 
