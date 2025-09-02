@@ -104,7 +104,7 @@ export default function InteractiveAvatar() {
             mainOneDiv.style.opacity = "1";
           }
           resolve();
-        }, 4000);
+        }, 3500);
       };
       gifImage.onerror = () => {
         gifImage.remove();
@@ -143,7 +143,7 @@ export default function InteractiveAvatar() {
         avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
           setIsAvatarSpeaking(false);
         });
-      }, 1500);
+      }, 1000);
     });
     
 
@@ -207,7 +207,7 @@ const startSessionTransition = () => {
     const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement;
     if (mainOneDiv) mainOneDiv.style.opacity = "1"; 
     if (videoBackground) videoBackground.style.opacity = "1"; 
-  }, 0);
+  }, 500);
 
   setTimeout(() => {
     if (gifImage.parentElement) {
@@ -441,8 +441,8 @@ setTimeout(() => {
             objectFit: "cover",
             opacity: "0",
             zIndex: "10",
-         maskImage: 'radial-gradient(circle at 51% 14%, transparent 165px, rgb(255, 255, 255) 218px)', 
-                    WebkitMaskImage: 'radial-gradient(circle at 51% 14%, transparent 165px, rgb(255, 255, 255) 218px)', 
+            maskImage: 'radial-gradient(circle at 51% 14%, transparent 165px, rgb(255, 255, 255) 218px)', 
+            WebkitMaskImage: 'radial-gradient(circle at 51% 14%, transparent 165px, rgb(255, 255, 255) 218px)', 
           }}
         />
 
@@ -482,7 +482,7 @@ setTimeout(() => {
   size="lg"
   onClick={startSession}
   style={{
-    backgroundImage: 'url("https://ouno.co.uk/Avatar/start.png")',
+    backgroundImage: 'url("/images/start-chat.png")',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
@@ -512,7 +512,7 @@ setTimeout(() => {
                       size="lg"
                       onClick={handleTimeoutEndSession}
                       style={{
-                   backgroundImage: 'url("https://ouno.co.uk/Avatar/end.png")',
+                   backgroundImage: 'url("/images/end-chat.png")',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',
