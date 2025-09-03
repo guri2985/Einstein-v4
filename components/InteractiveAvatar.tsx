@@ -90,8 +90,8 @@ export default function InteractiveAvatar() {
   
     setTimeout(() => {
   if (screensaverVideo) {
-    screensaverVideo.pause();       // stop both video and audio
-    screensaverVideo.currentTime = 0; // optional: reset to start
+    screensaverVideo.pause();       
+    screensaverVideo.currentTime = 0;
     screensaverVideo.style.display = "none";
   }
   showLoaderCallback();
@@ -104,7 +104,7 @@ export default function InteractiveAvatar() {
             mainOneDiv.style.opacity = "1";
           }
           resolve();
-        }, 3500);
+        }, 4500);
       };
       gifImage.onerror = () => {
         gifImage.remove();
@@ -143,7 +143,7 @@ export default function InteractiveAvatar() {
         avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
           setIsAvatarSpeaking(false);
         });
-      }, 1000);
+      }, 1500);
     });
     
 
