@@ -65,83 +65,59 @@ export default function InteractiveAvatar() {
     return "";
   }
 
-// Utility: wait until .main-one and avatar-stream are present in DOM
-const waitForBackgroundReady = (): Promise<void> => {
-  return new Promise((resolve) => {
-    const checkReady = () => {
-      const mainOneDiv = document.querySelector(".main-one");
-      const avatarVideo = document.querySelector(".avatar-stream");
-      if (mainOneDiv && avatarVideo) {
-        resolve();
-      } else {
-        requestAnimationFrame(checkReady); // keep checking until loaded
+  const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
+    return new Promise((resolve) => {
+     const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement | null;
+      const gifImage = document.createElement("img");
+      gifImage.src = "/images/Transitions.gif";
+      Object.assign(gifImage.style, {
+        position: "absolute",
+        left: "0",
+        top: "0",
+        width: "100%",
+        height: "100%",
+        opacity: "1",
+        zIndex: "9999",
+        backgroundColor: "transparent",
+      });
+  
+      const mainUpDiv = document.querySelector(".main-up") as HTMLElement;
+      const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
+  
+      if (mainUpDiv) {
+        mainUpDiv.appendChild(gifImage);
       }
-    };
-    checkReady();
-  });
-};
-
-const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
-  return new Promise(async (resolve) => {
-    const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement | null;
-
-    // ✅ Wait until .main-one + avatar stream exist before showing GIF
-    await waitForBackgroundReady();
-
-    const gifImage = document.createElement("img");
-    gifImage.src = "/images/Transitions.gif";
-    Object.assign(gifImage.style, {
-      position: "absolute",
-      left: "0",
-      top: "0",
-      width: "100%",
-      height: "100%",
-      opacity: "1",
-      zIndex: "9999",
-      backgroundColor: "transparent",
-    });
-
-    const mainUpDiv = document.querySelector(".main-up") as HTMLElement;
-    const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
-
-    if (mainUpDiv) {
-      mainUpDiv.appendChild(gifImage);
-    }
-
-    // Stop and hide screensaver after short delay
+  
     setTimeout(() => {
-      if (screensaverVideo) {
-        screensaverVideo.pause();
-        screensaverVideo.currentTime = 0;
-        screensaverVideo.style.display = "none";
-      }
-      showLoaderCallback();
-    }, 2000);
-
-    // Handle GIF load/finish
-    gifImage.onload = () => {
-      setTimeout(() => {
+  if (screensaverVideo) {
+    screensaverVideo.pause();       
+    screensaverVideo.currentTime = 0;
+    screensaverVideo.style.display = "none";
+  }
+  showLoaderCallback();
+}, 2000);
+  
+      gifImage.onload = () => {
+        setTimeout(() => {
+          gifImage.remove();
+          if (mainOneDiv) {
+            mainOneDiv.style.opacity = "1";
+          }
+          resolve();
+        }, 4000);
+      };
+      gifImage.onerror = () => {
         gifImage.remove();
+        if (screensaverVideo) {
+          screensaverVideo.style.display = "none";
+        }
         if (mainOneDiv) {
           mainOneDiv.style.opacity = "1";
         }
         resolve();
-      }, 4000); // keep GIF visible for 4s
-    };
-
-    gifImage.onerror = () => {
-      gifImage.remove();
-      if (screensaverVideo) {
-        screensaverVideo.style.display = "none";
-      }
-      if (mainOneDiv) {
-        mainOneDiv.style.opacity = "1";
-      }
-      resolve();
-    };
-  });
-};
-
+      };
+    });
+  };
 
   const startSession = async () => {
     setSessionEnded(false);
@@ -167,7 +143,7 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
         avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
           setIsAvatarSpeaking(false);
         });
-      }, 1500);
+      }, 1000);
     });
     
 
