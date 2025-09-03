@@ -456,8 +456,8 @@ setTimeout(() => {
             objectFit: "cover",
             opacity: "0",
             zIndex: "10",
-            maskImage: 'radial-gradient(circle at 50% 13%, transparent 184px, rgb(255, 255, 255) 210px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 50% 13%, transparent 184px, rgb(255, 255, 255) 210px)', 
+            maskImage: 'radial-gradient(circle at 49% 14%, transparent 184px, rgb(255, 255, 255) 210px)', 
+            WebkitMaskImage: 'radial-gradient(circle at 49% 14%, transparent 184px, rgb(255, 255, 255) 210px)', 
           }}
         />
 
