@@ -123,12 +123,13 @@ const startSession = async () => {
   setSessionEnded(false);
   hasEndedRef.current = false;
 
-  // Wait 2s before starting visible session (background preload time)
+  // Step 1: wait 2s so .main-one & avatar-stream load in background
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  // Show transition GIF first
+  // Step 2: show transition GIF overlay
   await showStartSessionGif(() => setIsLoadingSession(true));
 
+  // Step 3: initialize avatar after GIF overlay is handled
   const newToken = await fetchAccessToken();
   setIsLoadingSession(true);
 
@@ -141,7 +142,7 @@ const startSession = async () => {
     console.log(">>>>> Stream ready:", event.detail);
     setStream(event.detail);
 
-    // Keep avatar hidden until mask is visible
+    // Keep avatar hidden until mask fade in
     setTimeout(() => {
       setMaskVisible(true);
       const avatarVideo = document.querySelector(".avatar-stream") as HTMLElement;
@@ -191,7 +192,7 @@ const startSession = async () => {
     setIsLoadingSession(false);
   }
 
-  // Fire final transition effect
+  // Final pixel transition (if needed)
   startSessionTransition();
 };
 
