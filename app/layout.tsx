@@ -1,11 +1,9 @@
 import "@/styles/globals.css";
 import clsx from "clsx";
 import { Metadata, Viewport } from "next";
-<<<<<<< HEAD
-import Script from "next/script"; 
-=======
+
 import Script from "next/script"; // ✅ Import Next.js Script
->>>>>>> cdc6c67e768aa3cacf67f1754a685353b2945840
+
 
 import { Providers } from "./providers";
 
