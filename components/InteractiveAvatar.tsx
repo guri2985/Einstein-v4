@@ -423,8 +423,7 @@ setTimeout(() => {
           className="screensaver-video"
           src="https://ouno.co.uk/Avatar/Einstein.mp4"
           autoPlay
-          loop
-           muted
+          loop 
           style={{
            height: "100%",
             objectFit: "cover",
