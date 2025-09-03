@@ -145,3 +145,8 @@ video{
 pointer-events: none;
 
 }
+
+.avatar-stream {
+  opacity: 0;
+  visibility: hidden;
+}

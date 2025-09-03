@@ -119,103 +119,117 @@ export default function InteractiveAvatar() {
     });
   };
 
-  const startSession = async () => {
-    setSessionEnded(false);
-    hasEndedRef.current = false;
-    await showStartSessionGif(() => setIsLoadingSession(true));
-    const newToken = await fetchAccessToken();
-    setIsLoadingSession(true); 
-    avatar.current = new StreamingAvatar({
-      token: newToken,
-      basePath: baseApiUrl(),
-    });
-  
-    avatar.current?.on(StreamingEvents.STREAM_READY, (event) => {
-      console.log(">>>>> Stream ready:", event.detail);
-      setStream(event.detail);
-      setTimeout(() => {
-      setMaskVisible(true);
-        const avatarVideo = document.querySelector(".avatar-stream") as HTMLElement;
-        if (avatarVideo) avatarVideo.style.opacity = "1";
-        avatar.current?.on(StreamingEvents.AVATAR_START_TALKING, () => {
-          setIsAvatarSpeaking(true);
-        });
-        avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
-          setIsAvatarSpeaking(false);
-        });
-      }, 1000);
-    });
-    
+const startSession = async () => {
+  setSessionEnded(false);
+  hasEndedRef.current = false;
 
-    try {
-      const res = await avatar.current.createStartAvatar({
-        quality: AvatarQuality.High,
-          avatarName: "3c948ea847c94dd98e4fe62e4a605ec0",
-        knowledgeId,
-        voice: {
-          rate: 1,
-          emotion: VoiceEmotion.EXCITED,
-          elevenlabsSettings: {
-            stability: 1,
-            similarity_boost: 1,
-            style: 1,
-            use_speaker_boost: true,
-          },
+  // 1️⃣ Show first GIF
+  await showStartSessionGif(() => setIsLoadingSession(true));
+
+  // 2️⃣ Fetch token and init avatar
+  const newToken = await fetchAccessToken();
+  setIsLoadingSession(true);
+  avatar.current = new StreamingAvatar({
+    token: newToken,
+    basePath: baseApiUrl(),
+  });
+
+  avatar.current?.on(StreamingEvents.STREAM_READY, (event) => {
+    console.log(">>>>> Stream ready:", event.detail);
+    setStream(event.detail);
+
+    avatar.current?.on(StreamingEvents.AVATAR_START_TALKING, () => setIsAvatarSpeaking(true));
+    avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => setIsAvatarSpeaking(false));
+  });
+
+  try {
+    const res = await avatar.current.createStartAvatar({
+      quality: AvatarQuality.High,
+      avatarName: "3c948ea847c94dd98e4fe62e4a605ec0",
+      knowledgeId,
+      voice: {
+        rate: 1,
+        emotion: VoiceEmotion.EXCITED,
+        elevenlabsSettings: {
+          stability: 1,
+          similarity_boost: 1,
+          style: 1,
+          use_speaker_boost: true,
         },
-        language,
-        disableIdleTimeout: false,
-      });
-      setData(res);
-  
-      await avatar.current.startVoiceChat({ useSilencePrompt: true });
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      await avatar.current.speak({
-        text: "Hello, I am your interactive avatar. Let's begin!",
-      });
-    
-      setChatMode("voice_mode");
-   
+      },
+      language,
+      disableIdleTimeout: false,
+    });
+    setData(res);
+
+    await avatar.current.startVoiceChat({ useSilencePrompt: true });
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await avatar.current.speak({
+      text: "Hello, I am your interactive avatar. Let's begin!",
+    });
+
+    setChatMode("voice_mode");
   } catch (error) {
     console.error("Error starting avatar session:", error);
   } finally {
     setIsLoadingSession(false);
   }
-  startSessionTransition();
+
+  // 3️⃣ Wait for second GIF to finish before showing avatar
+  await startSessionTransition();
+
+  // 4️⃣ Show avatar only AFTER second GIF
+  setMaskVisible(true);
+  const avatarVideo = document.querySelector(".avatar-stream") as HTMLElement | null;
+  if (avatarVideo) {
+    avatarVideo.style.opacity = "1";
+    avatarVideo.style.visibility = "visible";
+  }
 };
+
+
 
   let isGifLoaded = false; 
  
-const startSessionTransition = () => {
-  if (isGifLoaded) return;
-  isGifLoaded = true; 
-  const gifImage = document.createElement("img");
-  gifImage.src = "/images/pixels_once.gif"; 
-  gifImage.style.position = "absolute";
-  gifImage.style.left = "0";
-  gifImage.style.width = "100%";
-  gifImage.style.height = "100%";
-  gifImage.style.top = "0";
-  gifImage.style.opacity = "1";
-  gifImage.style.zIndex = "1000"; 
 
-  const mainUpDiv = document.querySelector(".main-one");
-  if (mainUpDiv) {
-    mainUpDiv.appendChild(gifImage);
-  }
-  setTimeout(() => {
-    const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
-    const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement;
-    if (mainOneDiv) mainOneDiv.style.opacity = "1"; 
-    if (videoBackground) videoBackground.style.opacity = "1"; 
-  }, 500);
+const startSessionTransition = (): Promise<void> => {
+  return new Promise((resolve) => {
+    if (isGifLoaded) return resolve();
+    isGifLoaded = true;
 
-  setTimeout(() => {
-    if (gifImage.parentElement) {
-      gifImage.parentElement.removeChild(gifImage);
-    }
-    setButtonsVisible(true); 
-  }, 2000);
+    const gifImage = document.createElement("img");
+    gifImage.src = "/images/pixels_once.gif";
+    Object.assign(gifImage.style, {
+      position: "absolute",
+      left: "0",
+      top: "0",
+      width: "100%",
+      height: "100%",
+      opacity: "1",
+      zIndex: "1000",
+    });
+
+    const mainOneDiv = document.querySelector(".main-one");
+    mainOneDiv?.appendChild(gifImage);
+
+    // Optional minor delay to sync with video background
+    setTimeout(() => {
+      const mainOneDiv = document.querySelector(".main-one") as HTMLElement | null;
+      if (mainOneDiv) mainOneDiv.style.opacity = "1";
+
+      const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement | null;
+      if (videoBackground) videoBackground.style.opacity = "1";
+    }, 500);
+
+    // Remove GIF after 2 seconds and resolve
+    setTimeout(() => {
+      if (gifImage.parentElement) gifImage.parentElement.removeChild(gifImage);
+      setButtonsVisible(true);
+      resolve(); // <- avatar only becomes visible after this
+    }, 1000);
+  });
 };
+
 
 async function handleSpeak() {
   setIsLoadingRepeat(true);
