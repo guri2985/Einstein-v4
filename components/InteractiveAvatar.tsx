@@ -364,29 +364,40 @@ setTimeout(() => {
 }, 4000); 
 };
 
- useEffect(() => {
+useEffect(() => {
   const screensaverVideo = document.querySelector(
     ".screensaver-video"
-  ) as HTMLVideoElement;
+  ) as HTMLVideoElement | null;
 
-  if (screensaverVideo) {
-    screensaverVideo.muted = true; // ✅ Start muted so autoplay works
-    screensaverVideo.play().catch((err) => {
-      console.warn("Muted autoplay blocked:", err);
-    });
+  if (!screensaverVideo) return;
 
-    setTimeout(() => {
-      // 🔊 Try enabling sound after 3s
-      screensaverVideo.muted = false;
-      screensaverVideo
-        .play()
-        .then(() => console.log("Video playing with audio"))
-        .catch((err) =>
-          console.warn("Autoplay with audio blocked by browser:", err)
+  // ✅ Start muted so autoplay works
+  screensaverVideo.muted = true;
+
+  screensaverVideo.play().catch((err) => {
+    console.warn("Muted autoplay blocked:", err);
+  });
+
+  // Try unmuting after a short delay
+  setTimeout(() => {
+    screensaverVideo.muted = false;
+
+    screensaverVideo
+      .play()
+      .then(() => {
+        console.log("Video playing with audio");
+      })
+      .catch((err) => {
+        console.warn("Autoplay with audio blocked, fallback to muted:", err);
+        // 🔄 Fallback: keep it muted & playing
+        screensaverVideo.muted = true;
+        screensaverVideo.play().catch((err2) =>
+          console.error("Even muted playback failed:", err2)
         );
-    }, 3000);
-  }
+      });
+  }, 3000);
 }, []);
+
 
   
   const handleChangeChatMode = useMemoizedFn(async (v) => {
