@@ -187,8 +187,6 @@ const startSession = async () => {
   }
 };
 
-
-
   let isGifLoaded = false; 
  
 
@@ -423,6 +421,7 @@ setTimeout(() => {
           src="https://ouno.co.uk/Avatar/Einstein.mp4"
           autoPlay
           loop
+           muted
           style={{
            height: "100%",
             objectFit: "cover",
