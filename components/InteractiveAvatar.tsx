@@ -104,7 +104,7 @@ export default function InteractiveAvatar() {
             mainOneDiv.style.opacity = "1";
           }
           resolve();
-        }, 4000);
+        }, 5000);
       };
       gifImage.onerror = () => {
         gifImage.remove();
