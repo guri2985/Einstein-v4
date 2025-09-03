@@ -119,69 +119,82 @@ export default function InteractiveAvatar() {
     });
   };
 
-  const startSession = async () => {
-    setSessionEnded(false);
-    hasEndedRef.current = false;
-    await showStartSessionGif(() => setIsLoadingSession(true));
-    const newToken = await fetchAccessToken();
-    setIsLoadingSession(true); 
-    avatar.current = new StreamingAvatar({
-      token: newToken,
-      basePath: baseApiUrl(),
-    });
-  
-    avatar.current?.on(StreamingEvents.STREAM_READY, (event) => {
-      console.log(">>>>> Stream ready:", event.detail);
-      setStream(event.detail);
-      setTimeout(() => {
-      setMaskVisible(true);
-        const avatarVideo = document.querySelector(".avatar-stream") as HTMLElement;
-        if (avatarVideo) avatarVideo.style.opacity = "1";
-        avatar.current?.on(StreamingEvents.AVATAR_START_TALKING, () => {
-          setIsAvatarSpeaking(true);
-        });
-        avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
-          setIsAvatarSpeaking(false);
-        });
-      }, 1500);
-    });
-    
+const startSession = async () => {
+  setSessionEnded(false);
+  hasEndedRef.current = false;
 
-    try {
-      const res = await avatar.current.createStartAvatar({
-        quality: AvatarQuality.High,
-          avatarName: "3c948ea847c94dd98e4fe62e4a605ec0",
-        knowledgeId,
-        voice: {
-          rate: 1,
-          emotion: VoiceEmotion.EXCITED,
-          elevenlabsSettings: {
-            stability: 1,
-            similarity_boost: 1,
-            style: 1,
-            use_speaker_boost: true,
-          },
+  // Wait 2s before starting visible session (background preload time)
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  // Show transition GIF first
+  await showStartSessionGif(() => setIsLoadingSession(true));
+
+  const newToken = await fetchAccessToken();
+  setIsLoadingSession(true);
+
+  avatar.current = new StreamingAvatar({
+    token: newToken,
+    basePath: baseApiUrl(),
+  });
+
+  avatar.current?.on(StreamingEvents.STREAM_READY, (event) => {
+    console.log(">>>>> Stream ready:", event.detail);
+    setStream(event.detail);
+
+    // Keep avatar hidden until mask is visible
+    setTimeout(() => {
+      setMaskVisible(true);
+      const avatarVideo = document.querySelector(".avatar-stream") as HTMLElement;
+      if (avatarVideo) avatarVideo.style.opacity = "1";
+
+      avatar.current?.on(StreamingEvents.AVATAR_START_TALKING, () => {
+        setIsAvatarSpeaking(true);
+      });
+      avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
+        setIsAvatarSpeaking(false);
+      });
+    }, 1500);
+  });
+
+  try {
+    const res = await avatar.current.createStartAvatar({
+      quality: AvatarQuality.High,
+      avatarName: "3c948ea847c94dd98e4fe62e4a605ec0",
+      knowledgeId,
+      voice: {
+        rate: 1,
+        emotion: VoiceEmotion.EXCITED,
+        elevenlabsSettings: {
+          stability: 1,
+          similarity_boost: 1,
+          style: 1,
+          use_speaker_boost: true,
         },
-        language,
-        disableIdleTimeout: false,
-      });
-      setData(res);
-  
-      await avatar.current.startVoiceChat({ useSilencePrompt: true });
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      await avatar.current.speak({
-        text: "Hello, I am your interactive avatar. Let's begin!",
-      });
-    
-      setChatMode("voice_mode");
-   
+      },
+      language,
+      disableIdleTimeout: false,
+    });
+
+    setData(res);
+
+    await avatar.current.startVoiceChat({ useSilencePrompt: true });
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+
+    await avatar.current.speak({
+      text: "Hello, I am your interactive avatar. Let's begin!",
+    });
+
+    setChatMode("voice_mode");
   } catch (error) {
     console.error("Error starting avatar session:", error);
   } finally {
     setIsLoadingSession(false);
   }
+
+  // Fire final transition effect
   startSessionTransition();
 };
+
 
   let isGifLoaded = false; 
  
