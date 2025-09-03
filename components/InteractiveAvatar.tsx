@@ -364,15 +364,30 @@ setTimeout(() => {
 }, 4000); 
 };
 
-    useEffect(() => {
-      const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
-      if (screensaverVideo) {
-        screensaverVideo.pause();  
-        screensaverVideo.currentTime = 0; 
-        screensaverVideo.load(); // Force reload
-        screensaverVideo.play();
-      }
-    }, []);
+ useEffect(() => {
+  const screensaverVideo = document.querySelector(
+    ".screensaver-video"
+  ) as HTMLVideoElement;
+
+  if (screensaverVideo) {
+    screensaverVideo.muted = true; // ✅ Start muted so autoplay works
+    screensaverVideo.play().catch((err) => {
+      console.warn("Muted autoplay blocked:", err);
+    });
+
+    setTimeout(() => {
+      // 🔊 Try enabling sound after 3s
+      screensaverVideo.muted = false;
+      screensaverVideo
+        .play()
+        .then(() => console.log("Video playing with audio"))
+        .catch((err) =>
+          console.warn("Autoplay with audio blocked by browser:", err)
+        );
+    }, 3000);
+  }
+}, []);
+
   
   const handleChangeChatMode = useMemoizedFn(async (v) => {
     if (v === chatMode) {
@@ -456,8 +471,8 @@ setTimeout(() => {
             objectFit: "cover",
             opacity: "0",
             zIndex: "10",
-            maskImage: 'radial-gradient(circle at 49% 14%, transparent 184px, rgb(255, 255, 255) 210px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 49% 14%, transparent 184px, rgb(255, 255, 255) 210px)', 
+            maskImage: 'radial-gradient(circle at 50% 13%, transparent 184px, rgb(255 255 255) 267px)', 
+            WebkitMaskImage: 'radial-gradient(circle at 50% 13%, transparent 184px, rgb(255 255 255) 267px)', 
           }}
         />
 
