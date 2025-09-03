@@ -409,7 +409,6 @@ setTimeout(() => {
           src="https://ouno.co.uk/Avatar/e-screen.mp4"
           autoPlay
           loop
-          muted
           style={{
            height: "100%",
             objectFit: "cover",
