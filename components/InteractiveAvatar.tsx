@@ -410,6 +410,9 @@ setTimeout(() => {
     }
   }, [mediaStream, stream]);
 
+
+  
+
   return (
     <div className="main-wrapper" style={{ position: "relative" }}>
      <div className="main-up" style={{ height: "100%",  position: "absolute",
