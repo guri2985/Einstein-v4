@@ -482,8 +482,8 @@ useEffect(() => {
             objectFit: "cover",
             opacity: "0",
             zIndex: "9",
-            maskImage: 'radial-gradient(circle at 50% 13%, transparent 199px, rgb(255, 255, 255) 231px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 50% 13%, transparent 199px, rgb(255, 255, 255) 231px)', 
+            maskImage: 'radial-gradient(circle at 49% 12%, transparent 221px, rgb(255, 255, 255) 243px)', 
+            WebkitMaskImage: 'radial-gradient(circle at 49% 12%, transparent 221px, rgb(255, 255, 255) 243px)', 
           }}
         />
 
@@ -496,7 +496,7 @@ useEffect(() => {
           style={{
             objectFit: "contain",
             position: "absolute",
-            top: "293px",
+            top: "294px",
             left: "50%",
             transform: "translate(-50%, -50%)",  
             width: "1100px",
