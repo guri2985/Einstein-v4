@@ -481,9 +481,9 @@ useEffect(() => {
             height: "100%",
             objectFit: "cover",
             opacity: "0",
-            zIndex: "999",
-            maskImage: 'radial-gradient(circle at 51% 14%, transparent 180px, rgba(255, 255, 255, 0.6) 210px, white 240px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 51% 14%, transparent 180px, rgba(255, 255, 255, 0.6) 210px, white 240px)', 
+            zIndex: "9",
+            maskImage: 'radial-gradient(circle at 50% 14%, transparent 180px, rgba(255, 255, 255, 1) 210px)', 
+            WebkitMaskImage: 'radial-gradient(circle at 50% 14%, transparent 180px, rgba(255, 255, 255, 1) 210px)', 
           }}
         />
 
