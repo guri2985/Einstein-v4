@@ -481,7 +481,7 @@ useEffect(() => {
             height: "100%",
             objectFit: "cover",
             opacity: "0",
-            zIndex: "10",
+            zIndex: "999",
             maskImage: 'radial-gradient(circle at 51% 14%, transparent 180px, rgba(255, 255, 255, 0.6) 210px, white 240px)', 
             WebkitMaskImage: 'radial-gradient(circle at 51% 14%, transparent 180px, rgba(255, 255, 255, 0.6) 210px, white 240px)', 
           }}
@@ -502,6 +502,7 @@ useEffect(() => {
             width: "1100px",
              height: "607px",
             opacity: 1,
+			zIndex: "1",
           }}
         />
       </div>
