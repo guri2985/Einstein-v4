@@ -484,6 +484,7 @@ useEffect(() => {
             zIndex: "9",
             maskImage: 'radial-gradient(circle at 49% 229px, transparent 221px, rgb(255, 255, 255) 243px)', 
             WebkitMaskImage: 'radial-gradient(circle at 49% 229px, transparent 221px, rgb(255, 255, 255) 243px)', 
+
           }}
         />
 
@@ -497,6 +498,7 @@ useEffect(() => {
             objectFit: "contain",
             position: "absolute",
             top: "295px",
+
             left: "50%",
             transform: "translate(-50%, -50%)",  
             width: "1100px",
