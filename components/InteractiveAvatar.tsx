@@ -21,7 +21,7 @@ import {
 } from "@nextui-org/react";
 import { useEffect, useRef, useState } from "react";
 import { useMemoizedFn, usePrevious } from "ahooks";
-import LoadingScreen from "./LoadingScreen"; // Import the LoadingScreen component
+import LoadingScreen from "./LoadingScreen"; 
 import InteractiveAvatarTextInput from "./InteractiveAvatarTextInput";
 import { AVATARS, STT_LANGUAGE_LIST } from "@/app/lib/constants";
 export default function InteractiveAvatar() {
@@ -39,7 +39,7 @@ export default function InteractiveAvatar() {
   const [chatMode, setChatMode] = useState("text_mode");
   const [isUserTalking, setIsUserTalking] = useState(false);
   const [maskVisible, setMaskVisible] = useState(false);
-  const [buttonsVisible, setButtonsVisible] = useState(false);  // State to manage button visibility
+  const [buttonsVisible, setButtonsVisible] = useState(false); 
   const [sessionTimeout, setSessionTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isEndingSession, setIsEndingSession] = useState(false);
   const [isChatEnded, setIsChatEnded] = useState(false);
@@ -47,10 +47,48 @@ export default function InteractiveAvatar() {
   const hasEndedRef = useRef(false);
   const [countdownVisible, setCountdownVisible] = useState(false);
   const [isAvatarSpeaking, setIsAvatarSpeaking] = useState(false);
+  const [supportedLocales, setSupportedLocales] = useState<string[]>([]);
+  const [voices, setVoices] = useState<any[]>([]);
 
   function baseApiUrl() {
     return process.env.NEXT_PUBLIC_BASE_API_URL;
   }
+
+
+useEffect(() => {
+  async function fetchSupportedLocales() {
+    try {
+      const res = await fetch("/api/get-voices");
+      if (!res.ok) throw new Error(`Failed to fetch voices: ${res.status}`);
+
+      const voicesArray: any[] = await res.json();
+      console.log("Voices response:", voicesArray);
+
+      if (!Array.isArray(voicesArray)) {
+        console.error("Voices is not an array:", voicesArray);
+        return;
+      }
+      setVoices(voicesArray);
+
+      const supportedLocales = Array.from(
+        new Set(
+          voicesArray.map((v) =>
+            v.language?.toLowerCase().slice(0, 2) || "en"
+          )
+        )
+      );
+      setSupportedLocales(supportedLocales);
+
+      console.log("Supported locales across all voices:", supportedLocales);
+    } catch (err) {
+      console.error("Failed to fetch supported locales:", err);
+    }
+  }
+
+  fetchSupportedLocales();
+}, []);
+
+
   async function fetchAccessToken() {
     try {
       const response = await fetch("/api/get-access-token", {
@@ -142,43 +180,66 @@ const startSession = async () => {
     avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => setIsAvatarSpeaking(false));
   });
 
-  try {
-    const res = await avatar.current.createStartAvatar({
-      quality: AvatarQuality.High,
-      avatarName: "dd252a4748f84dbfa46157e9ed2ced86",
-      knowledgeId,
-      voice: {
-        rate: 1,
-        emotion: VoiceEmotion.EXCITED,
+try {
+  const languageMap: Record<string, string> = {
+    en: "English",
+    hi: "Hindi",
+    fr: "French",
+    it: "Italian",
+    ja: "Japanese",
+    de: "German",
+    es: "Spanish",
+  };
+
+  const fixedVoiceId = "b80f62e53d3e4050a73800b6cdb765f8"; 
+  const selectedVoice = voices.find(
+    (v) => v.language.toLowerCase().startsWith(language) && v.support_interactive_avatar
+  );
+
+  if (!selectedVoice) {
+    console.warn("No interactive voice found for language, using fixed voice instead.");
+  } else {
+    console.log("Selected voice for", language, ":", selectedVoice);
+  }
+
+  const res = await avatar.current.createStartAvatar({
+    quality: AvatarQuality.High,
+    avatarName: "dd252a4748f84dbfa46157e9ed2ced86",
+    knowledgeId,
+    voice: {
+      voiceId: fixedVoiceId, 
+      rate: 1,
+      emotion: VoiceEmotion.EXCITED,
         elevenlabsSettings: {
           stability: 1,
           similarity_boost: 1,
           style: 1,
           use_speaker_boost: true,
         },
-      },
-      language,
-      disableIdleTimeout: false,
-    });
-    setData(res);
+    },
+    language: language,
+    disableIdleTimeout: false,
+  });
 
-    await avatar.current.startVoiceChat({ useSilencePrompt: true });
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-    await avatar.current.speak({
-      text: "Hello, I am your interactive avatar. Let's begin!",
-    });
+  setData(res);
 
-    setChatMode("voice_mode");
-  } catch (error) {
-    console.error("Error starting avatar session:", error);
-  } finally {
-    setIsLoadingSession(false);
-  }
+  await avatar.current.startVoiceChat({ useSilencePrompt: true });
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+  await avatar.current.speak({
+    text: "Hello, I am your interactive avatar. Let's begin!",
+  });
 
-  // 3️⃣ Wait for second GIF to finish before showing avatar
+  setChatMode("voice_mode");
+} catch (error) {
+  console.error("Error starting avatar session:", error);
+} finally {
+  setIsLoadingSession(false);
+}
+
+
   await startSessionTransition();
 
-  // 4️⃣ Show avatar only AFTER second GIF
+
   setMaskVisible(true);
   const avatarVideo = document.querySelector(".avatar-stream") as HTMLElement | null;
   if (avatarVideo) {
@@ -227,23 +288,40 @@ const startSessionTransition = (): Promise<void> => {
     }, 1000);
   });
 };
-
-
-async function handleSpeak() {
-  setIsLoadingRepeat(true);
+const handleSpeak = async () => {
   if (!avatar.current) {
     setDebug("Avatar API not initialized");
     return;
   }
 
-  await avatar.current
-    .speak({ text: text, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC })
-    .catch((e) => {
-      setDebug(e.message);
-    });
+  setIsLoadingRepeat(true);
 
-  setIsLoadingRepeat(false);
+const selectedVoice = voices.find(
+  (v) =>
+    v.language.toLowerCase().startsWith(language) &&
+    v.support_interactive_avatar // only pick voices that are allowed for interactive avatars
+);
+
+if (!selectedVoice) {
+  console.error("No valid interactive voice for language:", language);
+  return;
 }
+
+  try {
+await avatar.current.speak({
+  text: text,
+  taskType: TaskType.REPEAT,
+  taskMode: TaskMode.SYNC,
+});
+
+  } catch (e: any) {
+    setDebug(e.message);
+  } finally {
+    setIsLoadingRepeat(false);
+  }
+};
+
+
 const handleUserSpeechStart = () => {
   setIsUserTalking(true);  
 
@@ -510,7 +588,32 @@ useEffect(() => {
       </div>
  <Card>
         <CardBody>
+      
+
+<label>Select Language:</label>
+      <select
+        value={language}
+        onChange={(e) => setLanguage(e.target.value)}
+        disabled={false} // disable only when session is running
+      >
+     {STT_LANGUAGE_LIST.map((lang) => (
+  <option
+    key={lang.key}
+    value={lang.value}
+    disabled={!supportedLocales.includes(lang.value.slice(0, 2).toLowerCase())}
+  >
+    {lang.label}
+  </option>
+))}
+
+      </select>
+
+
+
+
           {!stream && !isLoadingSession ? (
+            
+            
             <motion.div
               initial={{ scale: 1, opacity: 1 }} 
               animate={{ scale: [1, 1.03, 1], opacity: 1 }} 

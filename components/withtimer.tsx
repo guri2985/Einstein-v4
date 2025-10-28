@@ -1,5 +1,6 @@
 import type { StartAvatarResponse } from "@heygen/streaming-avatar";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import StreamingAvatar, {
   AvatarQuality,
   StreamingEvents,
@@ -30,7 +31,7 @@ export default function InteractiveAvatar() {
   const [debug, setDebug] = useState<string>();
   const [knowledgeId, setKnowledgeId] = useState<string>(""); 
   const [avatarId, setAvatarId] = useState<string>(""); 
-  const [language, setLanguage] = useState<string>("en");
+  const [language, setLanguage] = useState<string>("fr");
   const [data, setData] = useState<StartAvatarResponse>();
   const [text, setText] = useState<string>(""); 
   const mediaStream = useRef<HTMLVideoElement>(null);
@@ -46,11 +47,39 @@ export default function InteractiveAvatar() {
   const hasEndedRef = useRef(false);
   const [countdownVisible, setCountdownVisible] = useState(false);
   const [isAvatarSpeaking, setIsAvatarSpeaking] = useState(false);
- 
+  const [supportedLocales, setSupportedLocales] = useState<string[]>([]);
 
   function baseApiUrl() {
     return process.env.NEXT_PUBLIC_BASE_API_URL;
   }
+
+
+useEffect(() => {
+  async function fetchVoices() {
+    try {
+      const token = await fetchAccessToken(); // get access token
+      const res = await fetch(`${baseApiUrl()}/v2/voices`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const voices = await res.json();
+      console.log("Available voices:", voices);
+
+      // Example: find your avatar's voice and get supported locales
+      const avatarVoice = voices.find((v: any) => v.name === "Einstein 3");
+      if (avatarVoice) {
+        setSupportedLocales(avatarVoice.support_locale || []);
+        console.log("Supported locales for Einstein 3:", avatarVoice.support_locale);
+      }
+    } catch (err) {
+      console.error("Failed to fetch voices:", err);
+    }
+  }
+
+  fetchVoices();
+}, []);
+
   async function fetchAccessToken() {
     try {
       const response = await fetch("/api/get-access-token", {
@@ -65,103 +94,170 @@ export default function InteractiveAvatar() {
     return "";
   }
 
-  const startSession = async () => {
-    setSessionEnded(false);
-    hasEndedRef.current = false;
-    await showStartSessionGif(() => setIsLoadingSession(true));
-    const newToken = await fetchAccessToken();
-    setIsLoadingSession(true); 
-    avatar.current = new StreamingAvatar({
-      token: newToken,
-      basePath: baseApiUrl(),
-    });
+  const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
+    return new Promise((resolve) => {
+     const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement | null;
+      const gifImage = document.createElement("img");
+      gifImage.src = "/images/Transitions.gif";
+      Object.assign(gifImage.style, {
+        position: "absolute",
+        left: "0",
+        top: "0",
+        width: "100%",
+        height: "100%",
+        opacity: "1",
+        zIndex: "9999",
+        backgroundColor: "transparent",
+      });
   
-    avatar.current?.on(StreamingEvents.STREAM_READY, (event) => {
-      console.log(">>>>> Stream ready:", event.detail);
-      setStream(event.detail);
-      setTimeout(() => setMaskVisible(true), 0);
-    
-      const avatarVideo = document.querySelector(".avatar-stream") as HTMLElement;
-      if (avatarVideo) avatarVideo.style.opacity = "1";
-      avatar.current?.on(StreamingEvents.AVATAR_START_TALKING, () => {
-        setIsAvatarSpeaking(true);
-        resetInactivityTimer(); 
-      });
-      avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
-        setIsAvatarSpeaking(false);
-      });
+      const mainUpDiv = document.querySelector(".main-up") as HTMLElement;
+      const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
+  
+      if (mainUpDiv) {
+        mainUpDiv.appendChild(gifImage);
+      }
+  
+    setTimeout(() => {
+  if (screensaverVideo) {
+    screensaverVideo.pause();       
+    screensaverVideo.currentTime = 0;
+    screensaverVideo.style.display = "none";
+  }
+  showLoaderCallback();
+}, 2000);
+  
+      gifImage.onload = () => {
+        setTimeout(() => {
+          gifImage.remove();
+          if (mainOneDiv) {
+            mainOneDiv.style.opacity = "1";
+          }
+          resolve();
+        }, 4000);
+      };
+      gifImage.onerror = () => {
+        gifImage.remove();
+        if (screensaverVideo) {
+          screensaverVideo.style.display = "none";
+        }
+        if (mainOneDiv) {
+          mainOneDiv.style.opacity = "1";
+        }
+        resolve();
+      };
     });
-    try {
-      const res = await avatar.current.createStartAvatar({
-        quality: AvatarQuality.High,
-        avatarName: "8cb79c7f37d1430d96edc1402fea67b0",
-        knowledgeId,
-        voice: {
-          rate: 1,
-          emotion: VoiceEmotion.EXCITED,
-          elevenlabsSettings: {
-            stability: 1,
-            similarity_boost: 1,
-            style: 1,
-            use_speaker_boost: false,
-          },
+  };
+
+const startSession = async () => {
+  setSessionEnded(false);
+  hasEndedRef.current = false;
+
+  // 1️⃣ Show first GIF
+  await showStartSessionGif(() => setIsLoadingSession(true));
+
+  // 2️⃣ Fetch token and init avatar
+  const newToken = await fetchAccessToken();
+  setIsLoadingSession(true);
+  avatar.current = new StreamingAvatar({
+    token: newToken,
+    basePath: baseApiUrl(),
+  });
+
+  avatar.current?.on(StreamingEvents.STREAM_READY, (event) => {
+    console.log(">>>>> Stream ready:", event.detail);
+    setStream(event.detail);
+
+    avatar.current?.on(StreamingEvents.AVATAR_START_TALKING, () => setIsAvatarSpeaking(true));
+    avatar.current?.on(StreamingEvents.AVATAR_STOP_TALKING, () => setIsAvatarSpeaking(false));
+  });
+
+  try {
+    const res = await avatar.current.createStartAvatar({
+      quality: AvatarQuality.High,
+      avatarName: "dd252a4748f84dbfa46157e9ed2ced86",
+      knowledgeId,
+      voice: {
+        rate: 1,
+        emotion: VoiceEmotion.EXCITED,
+        elevenlabsSettings: {
+          stability: 1,
+          similarity_boost: 1,
+          style: 1,
+          use_speaker_boost: true,
         },
-        language,
-        disableIdleTimeout: true,
-      });
-      setData(res);
-  
-      await avatar.current.startVoiceChat({ useSilencePrompt: true });
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      await avatar.current.speak({
-        text: "Hello, I am your interactive avatar. Let's begin!",
-      });
-      resetInactivityTimer();
-      setChatMode("voice_mode");
-   
+      },
+      language,
+      disableIdleTimeout: false,
+    });
+    setData(res);
+
+    await avatar.current.startVoiceChat({ useSilencePrompt: true });
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await avatar.current.speak({
+      text: "Hello, I am your interactive avatar. Let's begin!",
+    });
+
+    setChatMode("voice_mode");
   } catch (error) {
     console.error("Error starting avatar session:", error);
   } finally {
     setIsLoadingSession(false);
   }
-  startSessionTransition();
-};
-  let isGifLoaded = false; 
-  
-const startSessionTransition = () => {
-  if (isGifLoaded) return;
-  isGifLoaded = true; 
 
-  // Create the GIF image for transition
-  const gifImage = document.createElement("img");
-  gifImage.src = "https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/pixels_once.gif"; 
-  gifImage.style.position = "absolute";
-  gifImage.style.left = "0";
-  gifImage.style.width = "100%";
-  gifImage.style.height = "100%";
-  gifImage.style.top = "0";
-  gifImage.style.opacity = "1";
-  gifImage.style.zIndex = "1000"; 
+  // 3️⃣ Wait for second GIF to finish before showing avatar
+  await startSessionTransition();
 
-  const mainUpDiv = document.querySelector(".main-one");
-  if (mainUpDiv) {
-    mainUpDiv.appendChild(gifImage);
+  // 4️⃣ Show avatar only AFTER second GIF
+  setMaskVisible(true);
+  const avatarVideo = document.querySelector(".avatar-stream") as HTMLElement | null;
+  if (avatarVideo) {
+    avatarVideo.style.opacity = "1";
+    avatarVideo.style.visibility = "visible";
   }
-  setTimeout(() => {
-    const mainOneDiv = document.querySelector(".main-one") as HTMLElement;
-    const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement;
-    if (mainOneDiv) mainOneDiv.style.opacity = "1"; 
-    if (videoBackground) videoBackground.style.opacity = "1"; 
-  }, 0);
-
-  setTimeout(() => {
-    if (gifImage.parentElement) {
-      gifImage.parentElement.removeChild(gifImage);
-    }
-    setButtonsVisible(true); 
-  }, 2000);
 };
+
+  let isGifLoaded = false; 
  
+
+const startSessionTransition = (): Promise<void> => {
+  return new Promise((resolve) => {
+    if (isGifLoaded) return resolve();
+    isGifLoaded = true;
+
+    const gifImage = document.createElement("img");
+    gifImage.src = "https://ouno.co.uk/Avatar/pixels_once.gif";
+    Object.assign(gifImage.style, {
+      position: "absolute",
+      left: "0",
+      top: "0",
+      width: "100%",
+      height: "100%",
+      opacity: "1",
+      zIndex: "1000",
+    });
+
+    const mainOneDiv = document.querySelector(".main-one");
+    mainOneDiv?.appendChild(gifImage);
+
+    // Optional minor delay to sync with video background
+    setTimeout(() => {
+      const mainOneDiv = document.querySelector(".main-one") as HTMLElement | null;
+      if (mainOneDiv) mainOneDiv.style.opacity = "1";
+
+      const videoBackground = document.querySelector("#main-video1") as HTMLVideoElement | null;
+      if (videoBackground) videoBackground.style.opacity = "1";
+    }, 500);
+
+    // Remove GIF after 2 seconds and resolve
+    setTimeout(() => {
+      if (gifImage.parentElement) gifImage.parentElement.removeChild(gifImage);
+      setButtonsVisible(true);
+      resolve(); // <- avatar only becomes visible after this
+    }, 1000);
+  });
+};
+
+
 async function handleSpeak() {
   setIsLoadingRepeat(true);
   if (!avatar.current) {
@@ -174,114 +270,46 @@ async function handleSpeak() {
     .catch((e) => {
       setDebug(e.message);
     });
-  resetInactivityTimer(); 
+
   setIsLoadingRepeat(false);
 }
-
-
-let inactivityTimerStart: number | null = null;
-let interruptionOccurred = false;  // Flag to track interruption within 52 seconds
-let inactivityTimeout: ReturnType<typeof setTimeout> | null = null;
-let graceTimeout: ReturnType<typeof setTimeout> | null = null;
-
 const handleUserSpeechStart = () => {
   setIsUserTalking(true);  
-  resetInactivityTimer();  
+
   handleInterrupt(); 
 };
 const handleUserSpeechEnd = () => {
   setIsUserTalking(false);  
 };
-
 async function handleInterrupt() {
   if (!avatar.current) {
     setDebug("Avatar API not initialized");
     return;
   }
-
-  if (inactivityTimerStart !== null) {
-    interruptionOccurred = true;
-
-    if (inactivityTimeout) {
-      clearTimeout(inactivityTimeout);
-      inactivityTimeout = null;
-    }
-    if (graceTimeout) {
-      clearTimeout(graceTimeout);
-      graceTimeout = null;
-    }
-
-    setCountdownVisible(false);
-    resetInactivityTimer();
-
-    try {
-      await avatar.current.interrupt();
-    } catch (e) {
-      if (e instanceof Error) {
-        setDebug(e.message);
-      } else {
-        setDebug("An unknown error occurred during interruption.");
-      }
-    }
-  } else {
-    console.warn("Inactivity timer has not started yet.");
-  }
 }
 
-
-const resetInactivityTimer = () => {
-  console.log("🔥 Resetting inactivity timer");
-
-  // Clear both timers
-  if (inactivityTimeout) {
-    clearTimeout(inactivityTimeout);
-    inactivityTimeout = null;
+const handleTimeoutEndSession = async () => {
+  showCloseSessionGif(); 
+  setButtonsVisible(false);
+  await new Promise(resolve => setTimeout(resolve, 1200));
+  try {
+    await avatar.current?.stopAvatar();
+  } catch (e) {
+    console.warn("Failed to stop avatar:", e);
   }
-  if (graceTimeout) {
-    clearTimeout(graceTimeout);
-    graceTimeout = null;
-  }
-
-  interruptionOccurred = false;
-  setCountdownVisible(false);
-
-  // First 41s idle timer
-  inactivityTimeout = setTimeout(() => {
-    if (!isUserTalking && !isAvatarSpeaking) {
-      console.log("⏳ No activity detected, starting grace countdown...");
-      setCountdownVisible(true);
-
-      // 10s grace period
-      graceTimeout = setTimeout(() => {
-        if (!isUserTalking && !isAvatarSpeaking) {
-          console.log("🛑 Still idle after grace period. Ending session...");
-          handleTimeoutEndSession();
-        } else {
-          console.log("✅ Activity resumed during grace period. Resetting.");
-          resetInactivityTimer(); // Fully reset both timers again
-        }
-      }, 10000);
-    } else {
-      console.log("✅ Activity detected before grace. Restarting main timer.");
-      resetInactivityTimer(); // Restart early if activity is detected
-    }
-  }, 41000);
+  endSession();
+  await new Promise(resolve => setTimeout(resolve, 300));
+  window.location.reload();
 };
-const handleTimeoutEndSession = () => {
-  if (hasEndedRef.current || interruptionOccurred) return; // Don't end session if interrupted
-  
-  setButtonsVisible(false); 
-  showCloseSessionGif();
-  setTimeout(() => {
-    endSession();
-  }, 1000);
-};
-
+(avatar.current as any)?.on(StreamingEvents.STREAM_DISCONNECTED, () => {
+  handleTimeoutEndSession(); 
+});
 const cleanUpSessionSync = () => {
   try {
+    avatar.current?.stopAvatar();
     avatar.current?.interrupt(); 
     avatar.current?.closeVoiceChat?.();
-    avatar.current?.stopAvatar();
+  
   } catch (e) {
     console.warn("Failed to clean session in beforeunload:", e);
   }
@@ -296,43 +324,33 @@ useEffect(() => {
     window.removeEventListener("beforeunload", handleBeforeUnload);
   };
 }, []);
-
 const endSession = async () => {
   if (hasEndedRef.current || !avatar.current) return;
   hasEndedRef.current = true;
   console.log("Ending session...");
 
   try {
-    // 🛑 Immediately interrupt any ongoing speech
     await avatar.current.interrupt();
-
-    // 🧹 Then stop everything else
     await avatar.current.closeVoiceChat?.();
     await avatar.current.stopAvatar();
     avatar.current = null;
   } catch (error) {
     console.warn("Error while stopping avatar:", error);
   }
-
   if (sessionTimeout) {
     clearTimeout(sessionTimeout);
     setSessionTimeout(null);
   }
-
   setSessionEnded(true);
   setButtonsVisible(false);
   setStream(undefined);
   setMaskVisible(false);
   setCountdownVisible(false);
-
-  // Fade out UI
   const avatarVideo = document.querySelector(".avatar-stream") as HTMLVideoElement;
   const backgroundVideo = document.querySelector("#main-video1") as HTMLVideoElement;
   const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
-
   if (avatarVideo) avatarVideo.style.opacity = "0";
   if (backgroundVideo) backgroundVideo.style.opacity = "0";
-
   if (screensaverVideo) {
     screensaverVideo.style.display = "block";
     screensaverVideo.pause();
@@ -342,9 +360,8 @@ const endSession = async () => {
   }
 };
 const showCloseSessionGif = () => {
-  // Create the GIF image
   const gifImage = document.createElement("img");
-  gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif";
+  gifImage.src = "https://ouno.co.uk/Avatar/Transitions.gif";
   gifImage.style.position = "absolute";
   gifImage.style.left = "0";
   gifImage.style.width = "100%";
@@ -352,87 +369,65 @@ const showCloseSessionGif = () => {
   gifImage.style.top = "0";
   gifImage.style.opacity = "1";
   gifImage.style.zIndex = "1000";
-  // Append GIF to .main-up
   const mainUpDiv = document.querySelector(".main-up");
   if (mainUpDiv) {
     mainUpDiv.appendChild(gifImage);
   }
-// Select the .main-one div and cast it to HTMLElement
 const mainOneDiv = document.querySelector(".main-one") as HTMLElement | null;
 if (mainOneDiv) {
   setTimeout(() => {
     mainOneDiv.style.opacity = "0"; 
   }, 4000);
 }
-  // After the GIF finishes, hide the GIF and show .main-up
   setTimeout(() => {
     if (gifImage.parentElement) {
-      gifImage.parentElement.removeChild(gifImage);  // Remove the GIF
+      gifImage.parentElement.removeChild(gifImage); 
     }
-// Select the .main-up element and cast it to HTMLElement
 const mainUpDiv = document.querySelector(".main-up") as HTMLElement | null;
 setTimeout(() => {
   if (mainUpDiv) {
-    mainUpDiv.style.transition = "opacity 1s ease-out"; // Smooth transition for the .main-up div
-    mainUpDiv.style.opacity = "1"; // Show .main-up
+    mainUpDiv.style.transition = "opacity 1s ease-out"; 
+    mainUpDiv.style.opacity = "1"; 
   }
-}, 0); // 2000 milliseconds = 2 seconds
-},4000); // Wait for the GIF to finish (4 seconds) before starting the 2-second delay
+}, 0); 
+}, 4000); 
 };
-const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
-  return new Promise((resolve) => {
-    const screensaverVideo = document.querySelector(".screensaver-video") as HTMLElement;
 
-    const gifImage = document.createElement("img");
-    gifImage.src = "https://ounocreatstg.wpenginepowered.com/videos/Transitions.gif";
-    Object.assign(gifImage.style, {
-      position: "absolute",
-      left: "0",
-      top: "0",
-      width: "100%",
-      height: "100%",
-      opacity: "1",
-      zIndex: "9999",
-      backgroundColor: "transparent",
-    });
+useEffect(() => {
+  const screensaverVideo = document.querySelector(
+    ".screensaver-video"
+  ) as HTMLVideoElement | null;
 
-    const mainUpDiv = document.querySelector(".main-up") as HTMLElement;
-    if (mainUpDiv) {
-      mainUpDiv.appendChild(gifImage);
-    }
+  if (!screensaverVideo) return;
 
-    setTimeout(() => {
-      if (screensaverVideo) {
-        screensaverVideo.style.display = "none";
-      }
-      // 🔄 Trigger loader screen after 2s
-      showLoaderCallback();
-    }, 2000);
-    gifImage.onload = () => {
-      setTimeout(() => {
-        gifImage.remove();
-        resolve();
-      }, 4000);
-    };
-    gifImage.onerror = () => {
-      gifImage.remove();
-      if (screensaverVideo) {
-        screensaverVideo.style.display = "none";
-      }
-      resolve();
-    };
+  // ✅ Start muted so autoplay works
+  screensaverVideo.muted = true;
+
+  screensaverVideo.play().catch((err) => {
+    console.warn("Muted autoplay blocked:", err);
   });
-};
-    useEffect(() => {
-      // Ensure screensaver video restarts on component mount
-      const screensaverVideo = document.querySelector(".screensaver-video") as HTMLVideoElement;
-      if (screensaverVideo) {
-        screensaverVideo.pause();  
-        screensaverVideo.currentTime = 0; 
-        screensaverVideo.load(); // Force reload
-        screensaverVideo.play();
-      }
-    }, []);
+
+  // Try unmuting after a short delay
+  setTimeout(() => {
+    screensaverVideo.muted = false;
+
+    screensaverVideo
+      .play()
+      .then(() => {
+        console.log("Video playing with audio");
+      })
+      .catch((err) => {
+        console.warn("Autoplay with audio blocked, fallback to muted:", err);
+        // 🔄 Fallback: keep it muted & playing
+        screensaverVideo.muted = true;
+        screensaverVideo.play().catch((err2) =>
+          console.error("Even muted playback failed:", err2)
+        );
+      });
+  }, 3000);
+}, []);
+
+
   
   const handleChangeChatMode = useMemoizedFn(async (v) => {
     if (v === chatMode) {
@@ -454,6 +449,11 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
     }
   }, [text, previousText]);
 
+  useEffect(() => {
+    return () => {
+      endSession();
+    };
+  }, []);
 
   useEffect(() => {
     if (stream && mediaStream.current) {
@@ -465,30 +465,28 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
     }
   }, [mediaStream, stream]);
 
+
+  
+
   return (
     <div className="main-wrapper" style={{ position: "relative" }}>
-      
-      {/* Default screensaver video */}
-      <div className="main-up" style={{ height: "100%",  position: "absolute",
+     <div className="main-up" style={{ height: "100%",  position: "absolute",
             top: "0",
             left: "0",
             width: "100%", }}>
         <video
           className="screensaver-video"
-          src="https://ounocreatstg.wpenginepowered.com/videos/william-screensaver.mp4"
+          src="https://ouno.co.uk/Avatar/Einstein.mp4"
           autoPlay
-          loop
-          muted
+          loop 
           style={{
-           
-            height: "100%",
+           height: "100%",
             objectFit: "cover",
             opacity: "1",
             transition: "opacity 1s ease-in-out",
           }}
         />
-        
-        {/* Append loader inside .main-up */}
+  
         {isLoadingSession && (
           <LoadingScreen
             onComplete={() => setIsLoadingSession(false)}
@@ -497,12 +495,10 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
         )}
       </div>
   
-      {/* Avatar video and new background */}
       <div className="main-one" style={{ opacity: "0", transition: "opacity 0s ease-in-out" }}>
-
         <video
           id="main-video1"
-          src="https://ounocreatstg.wpenginepowered.com/videos/main-video.mp4"
+          src="https://ouno.co.uk/Avatar/e-video.mp4"
           autoPlay
           loop
           muted
@@ -513,13 +509,16 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            opacity: "0", // Initially hidden
-            zIndex: "10",
-            maskImage: 'radial-gradient(circle at 50% 12%, transparent 130px, rgb(255, 255, 255) 180px)', 
-            WebkitMaskImage: 'radial-gradient(circle at 50% 12%, transparent 130px, rgb(255, 255, 255) 180px)', 
+            opacity: "0",
+            zIndex: "9",
+            maskImage: 'radial-gradient(circle at 49% 229px, transparent 221px, rgb(255, 255, 255) 243px)', 
+            WebkitMaskImage: 'radial-gradient(circle at 49% 229px, transparent 221px, rgb(255, 255, 255) 243px)', 
+
           }}
         />
-        <video
+
+
+<video
           ref={mediaStream}
           autoPlay
           playsInline
@@ -527,21 +526,45 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
           style={{
             objectFit: "contain",
             position: "absolute",
-            top: "330px",
-            left: "50.7%",
-            transform: "translate(-50%, -50%)",  // Centers the avatar on the screen
-            width: "1010px",
+            top: "295px",
+
+            left: "50%",
+            transform: "translate(-50%, -50%)",  
+            width: "1100px",
+             height: "607px",
+            opacity: 1,
+			zIndex: "1",
           }}
         />
       </div>
-  
-      {/* Session Start Button */}
-
-      <Card>
+ <Card>
         <CardBody>
+      
+<select
+  id="language-select"
+  value={language}
+  onChange={(e) => setLanguage(e.target.value)}
+  className="border rounded p-2 w-full"
+  disabled={isLoadingSession || !!stream}
+>
+  {STT_LANGUAGE_LIST.map((lang) => (
+    <option
+      key={lang.key}
+      value={lang.value}
+      disabled={supportedLocales.length > 0 && !supportedLocales.includes(lang.value)}
+    >
+      {lang.label}
+    </option>
+  ))}
+</select>
+
+
+
           {!stream && !isLoadingSession ? (
+            
+            
             <motion.div
-              initial={{ scale: 1, opacity: 1 }}  // Start at normal size
+              initial={{ scale: 1, opacity: 1 }} 
               animate={{ scale: [1, 1.03, 1], opacity: 1 }} 
               transition={{
                 duration: 1,
@@ -550,20 +573,24 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
                 repeatType: "reverse",
               }}
             >
-              <Button 
-                className="w-full text-white bg-main"
-                size="lg"
-                onClick={startSession}
-                style={{
-                  backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Startbutton.png")',
-                  backgroundSize: 'cover',  // Ensure the image covers the entire button
-                  backgroundPosition: 'center',  // Center the image in the button
-                  backgroundRepeat: 'no-repeat',  // Ensure the image doesn't repeat
-                  backgroundColor: 'transparent',
-                  width: '260px',
-                  height: '100px',
-                }}
-              />  
+        <Button 
+  className="w-full start-btn focus:outline-none active:outline-none hover:opacity-100 hover:filter-none active:opacity-100"
+  size="lg"
+  onClick={startSession}
+  style={{
+    backgroundImage: 'url("https://ouno.co.uk/Avatar/start.png")',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundColor: 'transparent',
+    width: '180px',
+    height: '180px',
+    boxShadow: 'none',
+    marginRight:'30px',
+  }}
+/>
+
+
             </motion.div>
           ) : isLoadingSession ? (
             <LoadingScreen onComplete={() => setIsLoadingSession(false)} isLoadingSession={isLoadingSession} />
@@ -581,18 +608,19 @@ const showStartSessionGif = (showLoaderCallback: () => void): Promise<void> => {
                       size="lg"
                       onClick={handleTimeoutEndSession}
                       style={{
-                        backgroundImage: 'url("https://ounocreatstg.wpenginepowered.com/wp-content/uploads/2025/04/Endbutton.png")',
+                   backgroundImage: 'url("https://ouno.co.uk/Avatar/END.png")',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',
                         backgroundColor: 'transparent',
-                        width: '260px',
-                        height: '100px',
+                        width: '180px',
+                        height: '180px',
+                         marginRight:'30px',
                       }}
                     />
                    {countdownVisible && (
   <img className="counter"
-    src="https://ounocreatstg.wpenginepowered.com/videos/counter.gif"
+    src="/images/counter.gif"
     alt="Countdown Timer"
     style={{
       position: "absolute",
