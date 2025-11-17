@@ -33,8 +33,8 @@ export default function LoadingScreen({ onComplete, isLoadingSession }: LoadingS
       transition={{ duration: 0.5 }}
       className="fixed inset-0 flex items-center justify-center bg-white text-white text-4xl font-bold z-50 loader-div"
       style={{
-        width: '1080px',
-        height: '1920px',
+        width: '1920px',
+        height: '980px',
         left: '50%',
         top: '50%',
         transform: 'translate(-50%, -50%)', 

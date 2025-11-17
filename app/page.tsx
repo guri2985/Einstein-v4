@@ -28,9 +28,9 @@ export default function App() {
       const wrapper = document.querySelector<HTMLElement>(".app-inner");
       if (!wrapper) return;
 
-      const scaleX = window.innerWidth / 1080; // portrait width
-      const scaleY = window.innerHeight / 1920; // portrait height
-      const scale = Math.min(scaleX, scaleY); // fit whole app
+      const scaleX = window.innerWidth / 1920;
+      const scaleY = window.innerHeight / 980; 
+      const scale = Math.min(scaleX, scaleY);
 
       wrapper.style.transform = `translate(-50%, -50%) scale(${scale})`;
       wrapper.style.position = "absolute";
@@ -80,8 +80,8 @@ export default function App() {
       <div
         className="app-inner"
         style={{
-          width: "1080px",
-          height: "1920px",
+          width: "1920px",
+          height: "980px",
           transformOrigin: "top left",
           transform: "scale(1)",
         }}
@@ -90,8 +90,8 @@ export default function App() {
           className="main-div"
           style={{
             position: "relative",
-            width: "1080px",
-            height: "1920px",
+            width: "1920px",
+            height: "980px",
             overflow: "hidden",
             margin: "auto",
           }}

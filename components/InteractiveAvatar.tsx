@@ -447,7 +447,7 @@ useEffect(() => {
             width: "100%", }}>
         <video
           className="screensaver-video"
-          src="https://ouno.co.uk/Avatar/Einstein.mp4"
+          src=""
           autoPlay
           loop 
           style={{
@@ -469,7 +469,7 @@ useEffect(() => {
       <div className="main-one" style={{ opacity: "0", transition: "opacity 0s ease-in-out" }}>
         <video
           id="main-video1"
-          src="https://ouno.co.uk/Avatar/e-video.mp4"
+          src=""
           autoPlay
           loop
           muted
@@ -497,12 +497,10 @@ useEffect(() => {
           style={{
             objectFit: "contain",
             position: "absolute",
-            top: "295px",
-
-            left: "50%",
-            transform: "translate(-50%, -50%)",  
-            width: "1100px",
-             height: "607px",
+            top: "-100px",
+              left: "0%",
+            width: "150%",
+             height: "111%",
             opacity: 1,
 			zIndex: "1",
           }}
