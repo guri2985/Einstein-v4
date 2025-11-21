@@ -196,7 +196,7 @@ const startSessionTransition = (): Promise<void> => {
     isGifLoaded = true;
 
     const gifImage = document.createElement("img");
-    gifImage.src = "https://ouno.co.uk/Avatar/pixels_once.gif";
+    gifImage.src = "/images/pixels_once.gif";
     Object.assign(gifImage.style, {
       position: "absolute",
       left: "0",
@@ -332,7 +332,7 @@ const endSession = async () => {
 };
 const showCloseSessionGif = () => {
   const gifImage = document.createElement("img");
-  gifImage.src = "https://ouno.co.uk/Avatar/Transitions.gif";
+  gifImage.src = "/images/Transitions.gif";
   gifImage.style.position = "absolute";
   gifImage.style.left = "0";
   gifImage.style.width = "100%";
@@ -524,7 +524,7 @@ useEffect(() => {
   size="lg"
   onClick={startSession}
   style={{
-    backgroundImage: 'url("https://ouno.co.uk/Avatar/start.png")',
+    backgroundImage: 'url("/images/start-chat.png")',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
@@ -554,7 +554,7 @@ useEffect(() => {
                       size="lg"
                       onClick={handleTimeoutEndSession}
                       style={{
-                   backgroundImage: 'url("https://ouno.co.uk/Avatar/END.png")',
+                   backgroundImage: 'url("/images/end-chat.png")',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',
