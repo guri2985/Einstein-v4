@@ -145,7 +145,7 @@ const startSession = async () => {
   try {
     const res = await avatar.current.createStartAvatar({
       quality: AvatarQuality.High,
-      avatarName: "dd252a4748f84dbfa46157e9ed2ced86",
+      avatarName: "7e34134378384954b0756af3d85d9853",
       knowledgeId: "21b1c5ec-601d-47ef-bfac-816d2b2d5e24",
       voice: {
         rate: 1,
