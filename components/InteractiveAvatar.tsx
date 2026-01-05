@@ -149,7 +149,7 @@ const startSession = async () => {
       knowledgeId: "9dd25b313f954eaea0929a2f2b00c0c4",
       voice: {
         rate: 1,
-        emotion: VoiceEmotion.EXCITED,
+        emotion: VoiceEmotion.SOOTHING,
         elevenlabsSettings: {
           stability: 1,
           similarity_boost: 1,
