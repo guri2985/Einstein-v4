@@ -148,13 +148,14 @@ const startSession = async () => {
       avatarName: "7e34134378384954b0756af3d85d9853",
       knowledgeId: "9dd25b313f954eaea0929a2f2b00c0c4",
       voice: {
-        rate: 1,
+        rate: 0.7,
         emotion: VoiceEmotion.SOOTHING,
         elevenlabsSettings: {
           stability: 1,
           similarity_boost: 1,
           style: 1,
           use_speaker_boost: true,
+		  speed: 0.7,  
         },
       },
       language,
