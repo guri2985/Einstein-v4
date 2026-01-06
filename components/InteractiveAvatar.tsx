@@ -153,8 +153,7 @@ const startSession = async () => {
         elevenlabsSettings: {
           stability: 1,
           similarity_boost: 1,
-          style: 1,
-		   speed: 0.7,
+          style: 1, 
           use_speaker_boost: true,
         },
       },
