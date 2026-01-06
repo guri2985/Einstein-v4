@@ -48,21 +48,6 @@ export default function InteractiveAvatar() {
   const [countdownVisible, setCountdownVisible] = useState(false);
   const [isAvatarSpeaking, setIsAvatarSpeaking] = useState(false);
 
-
-	const voiceSettings = {
-  rate: 1, 
-  emotion: VoiceEmotion.FRIENDLY,
-  elevenlabsSettings: {
-    stability: 0.5,         
-    similarity_boost: 0.8,   
-    style: 0,              
-    use_speaker_boost: true, 
-    speed: 1.0,            
-    pitch: 0.0,             
-  },
-};
-
-
   function baseApiUrl() {
     return process.env.NEXT_PUBLIC_BASE_API_URL;
   }
@@ -160,11 +145,22 @@ const startSession = async () => {
   try {
     const res = await avatar.current.createStartAvatar({
       quality: AvatarQuality.High,
-       avatarName: "7e34134378384954b0756af3d85d9
+      avatarName: "7e34134378384954b0756af3d85d9853",
+      knowledgeId: "9dd25b313f954eaea0929a2f2b00c0c4",
+      voice: {
+        rate: 1,
+        emotion: VoiceEmotion.SOOTHING,
+        elevenlabsSettings: {
+          stability: 1,
+          similarity_boost: 1,
+          style: 1,
+          use_speaker_boost: true,
+        },
+      },
+      language,
       disableIdleTimeout: false,
     });
     setData(res);
-	  
 
     await avatar.current.startVoiceChat({ useSilencePrompt: true });
     await new Promise((resolve) => setTimeout(resolve, 5000));
