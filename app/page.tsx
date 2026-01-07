@@ -81,7 +81,7 @@ export default function App() {
         className="app-inner"
         style={{
           width: "1920px",
-          height: "980px",
+          height: "1080px",
           transformOrigin: "top left",
           transform: "scale(1)",
         }}
@@ -91,7 +91,7 @@ export default function App() {
           style={{
             position: "relative",
             width: "1920px",
-            height: "980px",
+            height: "1080px",
             overflow: "hidden",
             margin: "auto",
           }}
