@@ -497,7 +497,7 @@ useEffect(() => {
           style={{
             objectFit: "contain",
             position: "absolute",
-            top: "-100px",
+            top: "0px",
               left: "0%",
             width: "100%",
              height: "100%",
